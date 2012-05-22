@@ -1,0 +1,30 @@
+<script type="text/javascript">
+    $(document).ready(function(){
+        if(!isAdmin()){
+            $('.tadmin').remove();
+        }
+    });
+</script>
+<div id="networkPage" class="container clearfix">
+    <div class="block network-overview">
+        <h5>Network</h5>
+
+        <div class="listPanel clearfix">
+            <div class="left col25">
+                <ul id="userList">
+                    <li id="overview"><a href="javascript:loadModule({tar:'userContent',src:'networkOverview',act:'overview',func:'Network_networkOverview'});Network_clearActive();" class="elementBlock">Overview</a></li>
+                    <li class="separator3"></li>
+                    <li class="tadmin" id="manager"><a href="javascript:loadModule({tar:'userContent',src:'networkManager',act:'manager',func:'Network_Manager_capManagement'});Network_clearActive();" class="elementBlock">Manager</a></li>
+                    <li class="tadmin separator3"></li>
+                    <li id="devices"><a href="javascript:Network_deviceViewSwitcher();" class="elementBlock">Devices</a></li>
+                    <li class="separator3"></li>
+                    <li id="deviceViews" class="textCenter controls hidden"><button id="deviceListView" class="active">List</button>&nbsp;&nbsp;<button id="deviceTileView">Tiles</button></li>
+                </ul>
+                <div id="deviceView1" class="hidden"></div>
+                <div id="deviceView2"></div>
+            </div>
+            <div id="userContent" class="right blockContent col75">
+            </div>
+        </div>
+    </div>
+</div>

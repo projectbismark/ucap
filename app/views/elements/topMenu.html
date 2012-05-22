@@ -1,0 +1,12 @@
+<script type="text/javascript">
+    $(document).ready(function(){
+        if(!isAdmin()){
+            $('.tadmin').remove();
+        }
+    });
+</script>
+<ul id="menuBar">
+    <li id="network"><a href="javascript:showPage({pageID:'network',func:'NetworkPage'});" >Network</a></li>
+    <li id="history"><a href="javascript:showPage({pageID:'history',func:'HistoryPage'});" >History &amp; Status</a></li>
+    <li id="settings" class="tadmin"><a href="javascript:showPage({pageID:'settings',func:'SettingsPage'});" >Settings</a></li>
+</ul>

@@ -1,0 +1,49 @@
+<script type="text/javascript">
+    $(document).ready(function(){
+        if(!isAdmin())
+            $('.tadmin').remove();
+        else
+            $('.tadminAlternate').remove();
+    });
+</script>
+<form id="deviceInfo" class="tadmin">
+    <ul class="left col70">
+        <li><label>Device Name:</label><input title="Device Name" name="device-name" type="text" onchange="Network_Device_saveDeviceInfo()"/></li>
+        <li><label>Device Description:</label><input title="Device Description" name="device-description" type="text" onchange="Network_Device_saveDeviceInfo()"/></li>
+        <li><input id="user-uid" name="uid" type="hidden" value=""/></li>
+        <li class="separator"></li>
+        <li><label>Device MAC Address: </label><strong>&nbsp;&nbsp;&nbsp;<span id="device-mac-address" class="allcaps"/></span></strong></li>
+        <li class="separator"></li>
+        <li><label>Device Usage:</label><div id="bar"></div><div class="light textCenter" name="progress-status"></div></li>
+        <li class="separator"></li>
+        <li><label>Notification:</label>
+            <ul id="notification">
+                <li><input type="checkbox" id="notify" name="notify" onchange="Network_Device_saveDeviceInfo()"/> Notify me when I approach my usage quota.</li>
+                <li>Remind me when I'm at <input class="inline smallField" type="text" value="" name="notifypercent" id="notifypercent" onchange="Network_Device_saveDeviceInfo()"/>% of my usage quota.</li>
+            </ul></li>
+    </ul>
+    <ul class="right col30" id="profileCol">
+        <li><a href="javascript:Network_Device_selectAvatar({src:'avatarSelectModal',type:'device'});" ><img class="profilePic" src="images/avatars/default.jpg"/></a></li>
+        <li><a href="javascript:Network_Device_selectAvatar({src:'avatarSelectModal',type:'device'});" >Change Picture</a></li>
+        <li class="separator"></li>
+    </ul>
+</form>
+
+<form id="deviceInfo" class="tadminAlternate">
+    <ul class="left col70">
+        <li><label>Device Name:</label>&nbsp;&nbsp;&nbsp;<span name="device-name"></span></li>
+        <li><label>Device Description:</label>&nbsp;&nbsp;&nbsp;<span class="light italic" name="device-description"></span></li>
+        <li class="separator"></li>
+        <li><label>Device MAC Address: </label><strong>&nbsp;&nbsp;&nbsp;<span id="device-mac-address" class="allcaps"/></span></strong></li>
+        <li class="separator"></li>
+        <li><label>Device Usage:</label><div id="bar"></div><div class="light textCenter" name="progress-status"></div></li>
+    </ul>
+    <ul class="right col30" id="profileCol">
+        <li><img class="profilePic" src="images/avatars/default.jpg"/></a></li>
+        <li class="separator"></li>
+    </ul>
+</form>
+
+
+
+

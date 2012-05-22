@@ -1,0 +1,31 @@
+<script type="text/javascript">
+    $('#loginPage').keypress(function(event) {
+        if ( event.which == 13 ) {
+            signIn();
+        }
+    });
+</script>
+<div id="loginPage" class="container-small clearfix">
+	<ul>
+		<li class="col45">
+		    <div class="logo"></div>
+			<h1 class="cushion adjustedHeading">This network is managed by uCap</h1>
+			<p class="cushion adjustedSubHeading">Please sign into an account or ask your network admin for a guest login.</p>
+		</li>
+		<li>
+			<div class="vertical-separator"></div>
+		</li>
+		<li class="col50">
+
+			<form id="loginForm" class="highlight">
+                <div class="error hidden ui-state-error"></div>
+				<label><strong>Username</strong><input id="username" title="Username" type="text"/></label>
+				<label class="toggleReset"><strong>Password</strong><input id="password" title="Password" type="password"/></label>
+                <input type="button" class="blue toggleReset" value="Submit" onmousedown="signIn();"/>
+                <input type="button" class="blue toggleReset hidden" value="Submit" onmousedown="resetPassword();"/><br/>
+                <a class="toggleReset" href="javascript:toggleReset();">I don't remember my password.</a>
+			</form>
+		</li>
+		
+	</ul>
+</div>

@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<title>uCap | Your data usage assistant</title>
+<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+
+<!-- Libraries -->
+<script type="text/javascript" src="lib/jquery/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="lib/jqueryui/jquery-ui-1.8.19.min.js"></script>
+<link rel="stylesheet" type="text/css" href="lib/jqueryui/jquery-ui-1.8.7.css" />
+
+<!-- Javascript -->
+<script type="text/javascript" src="js/helper.js"></script>
+<script type="text/javascript" src="js/general.js"></script>
+<script type="text/javascript" src="js/ui.js"></script>
+<script type="text/javascript" src="js/plugins.js"></script>
+<script type="text/javascript" src="js/json2.js"></script>
+<script type="text/javascript">
+    $.jsonRPC.setup({
+        endPoint: '/json/json/'
+    });
+</script>
+<script type="text/javascript" src="lib/highcharts/highcharts.js"></script>
+<script type="text/javascript" src="lib/highcharts/highcharts.theme.js"></script>
+
+<!-- Styling -->
+<link rel="stylesheet" type="text/css" href="css/general.css" />
+<link rel="stylesheet" type="text/css" media="screen" href="css/desktop.css">
+<![if !IE]><link rel="stylesheet" type="text/css" href="css/ie.css"><![endif]>
+<link rel="stylesheet" type="text/css" media="only screen and (min-device-width: 768px)" href="css/tablet.css">
+<link rel="stylesheet" type="text/css" media="only screen and (min-device-width: 480px)" href="css/mobile.css">
+</head>
+
+<body>
+<div id="header"></div>
+<div id="noticeBox" class="hidden"><div class="content"></div></div>
+<div id="modalBox" class="hidden"></div>
+<div id="menu"></div>
+<div id="content"></div>
+<div id="footer" class="small light textCenter">
+    <ul>
+        <li><a class="bismark" href="http://www.projectbismark.net" title="Project Bismark"></a></li>
+        <li>A Georgia Tech Project [<a href="http://gtnoise.net/" />GTNoise</a>] [<a href="http://www.cc.gatech.edu/pixi/" />PixiLab</a>]<br/>&copy; 2012 uCap. <em>All Rights Reserved.</em></li>
+        <li><a class="nsf" href="http://www.nsf.gov" title="National Science Foundation" ></a></li>
+    </ul>
+</div>
+</body>
+</html>

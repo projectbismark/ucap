@@ -1,0 +1,50 @@
+OVERVIEW
+--------
+There are two parts to the database: one that manages the
+households/users/devices, and the other that manages usages and caps.
+
+In the first part, we have 3 tables. households, users, devices. They're
+hierarchical; users are tied to households, and devices are tied to users. This
+means that user id is unique only within a household and device id is unique to
+a user.
+
+The second part that deals with usage and caps also has 3 tables currently.
+There are caps and usages for households, users, devices. Usage and cap are
+both set to 0 by default.  There is also a start and end date, for history
+purposes. The dates are inherited from households to users and users to
+devices. Cap allocation has to be done top down. The database checks for
+validity if caps: if you allocate or increase a cap to a device, it checks to
+see if the sum of caps of all devices of that user does not exceed the user
+cap. Likewise, if you allocate or increase cap to a user, the household caps
+are enforced. If you decrease the caps for household or user, the lower levels
+are checked for consistency. Decreasing cap is not allowed if current usage
+exceeds cap. Only devices contribute to real usage, and when device usage is
+updated, changes propagate up to the respective user and households. 
+
+I've tried to have as much consistency and error checking as possible in the 
+database itself, but *PLEASE* test it. Instructions for installation and testing
+follows a little useful implementation details.
+
+IMPLEMENTATION
+--------------
+All ids are limited to 10 characters. Household ids need to be unique; but users
+across different houses can have same id, and devices across different users can
+have the same id. This is implemented by tying the ids to the parent id. The households
+table primary key is the md5(id). For users, the primary key is md5(f(userid, houseid)).
+Likewise, the deviceid is md5(f(deviceid,userid,houseid)). The function, is this case,
+is to add 'xxxxxxxxxx' (10 x's) between the ids. For eg, the id of device3 belonging to user2 in house1 is md5(device3xxxxxxxxxxuser2xxxxxxxxxxhouse1). 
+
+Consistency is enforced with foreign key constraints and triggers. No user can exist without being
+affiliated to a house, (likewise devices <- users) , and entries in the caps tables are linked to
+the corresponding management tables. Updating caps, usages, etc are checked before the actual
+updates by triggers. The trigger functions are in functions.sql. Table structures (first draft)
+are in tables.sql.
+
+INSTALLATION
+------------
+In bourbon, go the schema directory of the download, and make all DB=<dbname>. For subsequent runs, you have to do make clean all DB=<dbname>. This will create the database which you can access with
+psql <dbname>. Please let me know if this throws ERRORs (ignore NOTICEs).
+The dummy.sql file has a dummy structure with 2 households, 4 users, and 8 devices. Please feel free to modify this for testing, but please do it on a local copy (do not check in this file).
+make verify DB=<dbname> will execute the commands in the dummy.sql file.
+
+

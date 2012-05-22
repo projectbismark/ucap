@@ -1,0 +1,37 @@
+<div id="historyPage" class="container clearfix">
+   <form id="historyInfo">
+        <div class="block history-page">
+            <h5>Household History</h5>
+            <ul id="rangePicker" class="textCenter">
+                <li>Display household usage between</li>
+                <li>&nbsp;<span class="dateInputSet"><input type="text" id="startdate" value="" class="datepicker" /></span></li>
+                <li>&nbsp;and</li>
+                <li>&nbsp;<span class="dateInputSet"><input type="text" id="enddate" value="" class="datepicker" /></span></li>
+                <li>&nbsp;<input type="button" value="Go!" onmousedown="History_showUsage();" /></li>
+            </ul>
+            <div class="separator"></div>
+            <div id="householdStats" class="hidden">
+                <h6>Device Usage</h6>
+                <h3 id="totalUsage" class="textCenter"></h3>
+                <div id="usageChart">
+
+                </div>
+                <br/><br/>
+                <div>
+                    <div class="left col45">
+                        <h6>Top Domains Visited</h6>
+                        <div id="usageList">
+
+                        </div>
+                    </div>
+                    <div class="right col50">
+                        <h6>System Log</h6>
+                        <div id="logCanvas">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+   </form>
+</div>
