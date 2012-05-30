@@ -257,7 +257,9 @@ var UCapViz = {
             tooltip: {
                 formatter: function() {
                     var d = new Date(this.x);
-                    return '<b>'+ this.series.name +'</b><br/><em>Date: </em>'+ d.toDateString() +'<br/><em>Usage: </em>'+ this.y + 'MB';
+                    d = d.toUTCString().split(" ");
+                    d = d[0] + " " + d[1] + " " + d[2] + " " + d[3];
+                    return '<b>'+ this.series.name +'</b><br/><em>Date: </em>'+ d +'<br/><em>Usage: </em>'+ this.y + 'MB';
                 },
                 borderWidth: 1
             },
