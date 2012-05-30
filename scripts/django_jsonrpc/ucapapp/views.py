@@ -561,10 +561,16 @@ def getHouseMetaInfo(hid):
     cmd = "select h.id,h.address,h.details,h.photo,u.cap,u.usage,u.capped,u.startdt from %s as h, %s as u \
            where h.digest = '%s' and u.digest = '%s'"%(tab,utab,digest,digest)
     res = sql.run_data_cmd(cmd)
+    tmp = []
+    tmp = list(res[0])
+    inf_idx = 4
+    if res[0][inf_idx]==float('inf'):
+        tmp[inf_idx] = float(-1)
     try:
-      return [1,(res[0][0],res[0][1],res[0][2],res[0][3],res[0][4],res[0][5],res[0][6],res[0][7])]
+        return [1,(tmp[0],tmp[1],tmp[2],tmp[3],tmp[4],tmp[5],tmp[6],tmp[7])]
+#        return [1,(res[0][0],res[0][1],res[0][2],res[0][3],res[0][4],res[0][5],res[0][6],res[0][7])]
     except:
-      return [0,('ERROR: No match found')]
+        return [0,('ERROR: No match found')]
 
 def getHouseCapUsageInfo(hid):
     unittype = 'household'
