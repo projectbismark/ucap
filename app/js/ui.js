@@ -628,16 +628,16 @@ function Reward_clearActive(){
 }
 
 function Reward_rewardOverview() {
-//    UCapManager.startScheduler({func:'Network_Overview_householdUsage', scope:"element", freq:1000});
-//    var dataArray = [];
-//    for (var i in UCapCore.devices)
-//    {    for(var j = 0, k = UCapCore.devices[i].length; j < k; j++){
-//            var devicename = UCapCore.devices[i][j][1];
-//            var deviceusage = (UCapCore.devices[i][j][6]/1048576);
-//            dataArray.push([devicename,deviceusage]);
-//        }
-//    }
-//    UCapViz.drawChart({tar:'chartarea',data:dataArray});
+    UCapManager.startScheduler({func:'Network_Overview_householdUsage', scope:"element", freq:1000});
+    var dataArray = [];
+    for (var i in UCapCore.devices)
+    {    for(var j = 0, k = UCapCore.devices[i].length; j < k; j++){
+            var devicename = UCapCore.devices[i][j][1];
+            var deviceusage = (UCapCore.devices[i][j][6]/1048576);
+            dataArray.push([devicename,deviceusage]);
+        }
+    }
+    UCapViz.drawChart({tar:'chartarea',data:dataArray});
 }
 
 function Reward_redemption() {

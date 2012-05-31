@@ -381,4 +381,14 @@ body{
     padding: 0;
 }
 
+#reward-overview
+{
+	margin: 1em;
+}
+
+#reward-overview td
+{
+	text-align: right;
+}
+
 
