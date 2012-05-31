@@ -366,3 +366,19 @@ body{
 #historyPage #logCanvas li:last-child{
     border-bottom: none;
 }
+
+/* Reward Page */
+#rewardPage .reward-page h5 {
+    background: url('../images/overview.png') no-repeat 0.5em 0;
+}
+
+#rewardPage .listPanel {
+    width: 100%;
+}
+
+#rewardPage .listPanel #userList {
+    margin: 0;
+    padding: 0;
+}
+
+

@@ -365,11 +365,15 @@ function Network_Overview_householdUsage() {
 }
 
 function Network_Manager_capManagement(){
-    var startDay = UCapCore.household[7].split(' ').slice(0,1);
-    startDay = startDay[0].split('-');
-    startDay = new Date(startDay[0], parseInt(startDay[1] - 1), startDay[2]);
-    startDay = $.datepicker.formatDate("dd M yy",startDay);
-    $("#startday").val(startDay);
+	var startDay = UCapCore.household[7];
+	if (startDay != undefined)
+	{
+		var startDay = UCapCore.household[7].split(' ').slice(0,1);
+		startDay = startDay[0].split('-');
+		startDay = new Date(startDay[0], parseInt(startDay[1] - 1), startDay[2]);
+		startDay = $.datepicker.formatDate("dd M yy",startDay);
+		$("#startday").val(startDay);
+	}
 
     $( "#startday").datepicker({
         dateFormat: "dd M yy"
@@ -612,6 +616,34 @@ function Network_Device_saveDeviceInfo() {
         UCapCore.setDeviceInfoEx({hid:UCapCore.household[0], uid:uid, did:did, name:name, details:details, notify:item[7], notifyperc:notifypercent, notified:user[5], photo:photo});
     }
 }
+
+
+/* Reward Page */
+function RewardPage() {
+	UCapManager.loadModule({tar:'userContent', src:'rewardOverview', act:'overview',func:'Reward_rewardOverview'});
+}
+
+function Reward_clearActive(){
+    $('.activeDevice').remove();
+}
+
+function Reward_rewardOverview() {
+//    UCapManager.startScheduler({func:'Network_Overview_householdUsage', scope:"element", freq:1000});
+//    var dataArray = [];
+//    for (var i in UCapCore.devices)
+//    {    for(var j = 0, k = UCapCore.devices[i].length; j < k; j++){
+//            var devicename = UCapCore.devices[i][j][1];
+//            var deviceusage = (UCapCore.devices[i][j][6]/1048576);
+//            dataArray.push([devicename,deviceusage]);
+//        }
+//    }
+//    UCapViz.drawChart({tar:'chartarea',data:dataArray});
+}
+
+function Reward_redemption() {
+
+}
+
 
 /* Login */
 function signIn() {

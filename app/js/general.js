@@ -77,11 +77,15 @@ var UCapManager = {
                 UCapManager.cleanScheduler({scope:"module"});
                 UCapManager.setCurrentSubPage(obj.act);
             }
+			
             if(obj.src == "networkOverview"){
                 Network_networkOverview();
             }else if(obj.src == "deviceOverview"){
                 Network_deviceOverview({uid:obj.uid,did:obj.did});
-            }
+            }else if(obj.src == "rewardOverview"){
+				Reward_rewardOverview();
+			}
+			
             if(obj.func)eval(obj.func + "()");
         }).hide().fadeIn(500);
     },
