@@ -310,6 +310,15 @@ body{
     background: url('../images/settings.png') no-repeat 0.5em 0;
 }
 
+#settingsPage .listPanel {
+    width: 100%;
+}
+
+#settingsPage .listPanel #userList {
+    margin: 0;
+    padding: 0;
+}
+
 #settingsPage .helperText{
     padding:0 0 0 2em;
     color:#999;

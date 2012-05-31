@@ -1,33 +1,19 @@
 <div id="settingsPage" class="container clearfix">
-    <form id="acctInfo">
-        <div class="block settings-page">
-            <h5>Account Settings</h5>
-            <ul class="left col80">
-                <li><div class="inputField"><label>Household Address</label><input title="Household Address" name="household-address" type="text" onchange="Settings_saveAccountInfo()"/></div><div class="helperText">Enter a name for your household.</div></li>
-                <li><div class="inputField"><label>Household Description</label><input title="Household Description" name="household-details" type="text" onchange="Settings_saveAccountInfo()"/></div><div class="helperText">Would you like to enter a few words to describe your account/household?</div></li>
-                <li><input id="user-uid" name="uid" type="hidden" value=""/></li>
-                <li class="separator"></li>
-                <li><div class="inputField"><label>Account Name</label><input title="Account Name" name="account-name" type="text" onchange="Settings_saveAccountInfo()"/></div><div class="helperText">What's your name?</div></li>
-                <li><div class="inputField"><label>Account Email</label><input title="Account Email" name="account-email" type="text" onchange="Settings_saveAccountInfo()"/></div><div class="helperText">Enter a valid email address.</div></li>
-                <li class="separator"></li>
-                <li>
-                    <ul id="changePassword">
-                        <li><div class="inputField textCenter"><input type="button" value="Change Password" onmousedown="Settings_toggleChangePassword()"/></div><div class="helperText">If you wish to change your account password click "Change Password".</div></li>
-                    </ul>
-                    <ul id="changePasswordFieldSet" class="hidden">
-                    <li><div class="inputField"><label>Old Password</label><input title="Old Password" name="old-account-password" type="password"/></div></li>
-                    <li><div class="inputField"><label>New Password</label><input title="New Password" name="new-account-password" type="password"/></div></li>
-                    <li><div class="inputField"><label>Confirm New Password</label><input title="Confirm New Password" name="confirm-new-account-password" type="password"/></div></li>
-                    <li><input type="button" value="Cancel" onmousedown="Settings_toggleChangePassword()"/>&nbsp;&nbsp;<input type="button" class="red" value="Update Password" onmousedown="Settings_updateAccountPassword()"/></li>
-                    </ul>
-                </li>
-                <li class="controls textRight"><input type="button" onmousedown="Settings_saveAccountInfo()" value="Save"/></li>
-            </ul>
-            <ul class="right col20" id="profileCol">
-                <li><a href="javascript:Settings_selectAvatar({src:'avatarSelectModal',type:'user'});"><img class="profilePic" src="images/user_avatars/default.jpg"/></a></li>
-                <li><a href="javascript:Settings_selectAvatar({src:'avatarSelectModal',type:'user'});">Change Picture</a></li>
-            </ul>
+    <div class="block settings-page">
+		<h5>Settings</h5>
+		
+		<div class="listPanel clearfix">
+            <div class="left col25">
+                <ul id="userList">
+                    <li id="account"><a href="javascript:loadModule({tar:'userContent',src:'settingAccount',act:'account',func:'Setting_account'});Setting_clearActive();" class="elementBlock">Account Settings</a></li>
+                    <li class="separator3"></li>
+                    <li id="point"><a href="javascript:loadModule({tar:'userContent',src:'settingPoint',act:'point',func:'Setting_point'});Setting_clearActive();" class="elementBlock">Reward Point Settings</a></li>
+                    <li class="separator3"></li>
+                </ul>
+            </div>
+            <div id="userContent" class="right blockContent col75">
+            </div>
         </div>
-
-    </form>
+		
+	</div>
 </div>

@@ -1,0 +1,30 @@
+<form id="acctInfo">
+
+	<ul class="left col80">
+		<li><div class="inputField"><label>Household Address</label><input title="Household Address" name="household-address" type="text" onchange="Settings_saveAccountInfo()"/></div><div class="helperText">Enter a name for your household.</div></li>
+		<li><div class="inputField"><label>Household Description</label><input title="Household Description" name="household-details" type="text" onchange="Settings_saveAccountInfo()"/></div><div class="helperText">Would you like to enter a few words to describe your account/household?</div></li>
+		<li><input id="user-uid" name="uid" type="hidden" value=""/></li>
+		<li class="separator"></li>
+		<li><div class="inputField"><label>Account Name</label><input title="Account Name" name="account-name" type="text" onchange="Settings_saveAccountInfo()"/></div><div class="helperText">What's your name?</div></li>
+		<li><div class="inputField"><label>Account Email</label><input title="Account Email" name="account-email" type="text" onchange="Settings_saveAccountInfo()"/></div><div class="helperText">Enter a valid email address.</div></li>
+		<li class="separator"></li>
+		<li>
+			<ul id="changePassword">
+				<li><div class="inputField textCenter"><input type="button" value="Change Password" onmousedown="Settings_toggleChangePassword()"/></div><div class="helperText">If you wish to change your account password click "Change Password".</div></li>
+			</ul>
+			<ul id="changePasswordFieldSet" class="hidden">
+			<li><div class="inputField"><label>Old Password</label><input title="Old Password" name="old-account-password" type="password"/></div></li>
+			<li><div class="inputField"><label>New Password</label><input title="New Password" name="new-account-password" type="password"/></div></li>
+			<li><div class="inputField"><label>Confirm New Password</label><input title="Confirm New Password" name="confirm-new-account-password" type="password"/></div></li>
+			<li><input type="button" value="Cancel" onmousedown="Settings_toggleChangePassword()"/>&nbsp;&nbsp;<input type="button" class="red" value="Update Password" onmousedown="Settings_updateAccountPassword()"/></li>
+			</ul>
+		</li>
+		<li class="controls textRight"><input type="button" onmousedown="Settings_saveAccountInfo()" value="Save"/></li>
+	</ul>
+	<ul class="right col20" id="profileCol">
+		<li><a href="javascript:Settings_selectAvatar({src:'avatarSelectModal',type:'user'});"><img class="profilePic" src="images/user_avatars/default.jpg"/></a></li>
+		<li><a href="javascript:Settings_selectAvatar({src:'avatarSelectModal',type:'user'});">Change Picture</a></li>
+	</ul>
+
+
+</form>

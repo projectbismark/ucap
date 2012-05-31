@@ -11,6 +11,14 @@ function ActiveMenu(){
 
 /* Settings Page */
 function SettingsPage() {
+	UCapManager.loadModule({tar:'userContent', src:'settingAccount',act:'account',func:'Setting_account'})
+}
+
+function Setting_clearActive(){
+    $('.activeDevice').remove();
+}
+
+function Setting_account() {
     $('input[name="household-address"]').val(UCapCore.household[1]);
     $('input[name="household-details"]').val(UCapCore.household[2]);
     var user = UCapCore.findUser({uid:localStorage['uid']});
@@ -20,6 +28,10 @@ function SettingsPage() {
     $('input[name="account-name"]').val(user[1]);
     $('input[name="account-email"]').val(user[8]);
     $('#profileCol .profilePic').attr('src', 'images/user_avatars/' + picture + '.jpg');
+}
+
+function Setting_point() {
+	
 }
 
 function Settings_saveAccountInfo(){

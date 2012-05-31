@@ -84,6 +84,8 @@ var UCapManager = {
                 Network_deviceOverview({uid:obj.uid,did:obj.did});
             }else if(obj.src == "rewardOverview"){
 				Reward_rewardOverview();
+			}else if(obj.src == "settingAccount"){
+				Setting_account();
 			}
 			
             if(obj.func)eval(obj.func + "()");
