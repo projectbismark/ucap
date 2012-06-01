@@ -172,15 +172,20 @@ function History_drawGraph(obj){
 function History_showList(obj){
     var list = obj.data;
     var template = '<table id="topdomains" class="tablesorter"><thead><tr><th>Domain</th><th>Usage (MB)</th><th>Usage (%)</th></tr><thead><tbody>';
-    var temp = [];
+
     for(var x in list){
+		if (x == "other")
+			continue;
+		
         var usage;
         usage = (list[x][0][0]/ 1048576).toFixed(1);
         template += '<tr><td><strong>'+x+'</strong></td><td>'+usage+'</td><td>'+Math.round(list[x][0][1] * 100)+'<small class="light">%</small></td></tr>';
     }
     template += '</tbody></table>';
     $('#usageList').html(template);
-    $("#topdomains").tablesorter();
+    $("#topdomains").tablesorter({
+		sortList: [[1,1]]	
+	});
 }
 
 function History_formatSystemLog(obj){
@@ -377,10 +382,7 @@ function Network_Overview_householdUsage() {
 			billingDay = billingDay[0].split('-');
 			billingDay = new Date(billingDay[0], billingDay[1] - 1, billingDay[2]);
 			
-			var millisBetween = billingDay.getTime() - today.getTime();
-			var millisecondsPerDay = 1000 * 60 * 60 * 24;
-			var daysRemaining = Math.ceil(millisBetween / millisecondsPerDay);
-			
+			var daysRemaining = differenceInDays(today, billingDay);
 			if (daysRemaining == 1)
 				template3 = daysRemaining + " day";
 			else
