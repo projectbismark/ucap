@@ -4,7 +4,7 @@
         <li class="leftPadding">Total Monthy Bandwidth Cap: <input name="household-cap" type="text" class="inline smallField" onchange="Network_Manager_saveNetworkInfo()"/>&nbsp;GB</li>
         <li class="leftPadding">Allocated Bandwidth: <strong name="allocated-badwidth">0</strong></li>
         <li class="leftPadding">My Cap and Billing Cycle Resets On:
-            <span class="dateInputSet"><input type="text" id="startday" value="" name="start-day" class="datepicker" onchange="Network_Manager_saveStartDate()"/></span>
+            <span class="dateInputSet"><input type="text" id="startday" value="" name="start-day" class="datepicker" onchange="Network_Manager_saveStartDate()" readonly="readonly"/></span>
         <li><h6>Monthly Device Caps</h6></li>
         <li>
             <table id="usageCaps">
