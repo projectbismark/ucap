@@ -19,7 +19,7 @@
         <li><label>Notification:</label>
             <ul id="notification">
                 <li><input type="checkbox" id="notify" name="notify" onchange="Network_Device_saveDeviceInfo()"/> Notify me when I approach my usage quota.</li>
-                <li>Remind me when I'm at <input class="inline smallField" type="text" value="" name="notifypercent" id="notifypercent" onchange="Network_Device_saveDeviceInfo()"/>% of my usage quota.</li>
+                <li>Remind me when I'm at <input class="inline smallField" type="text" value="" name="notifypercent" id="notifypercent" onkeypress="return numericOnly(event)" onchange="Network_Device_saveDeviceInfo()"/>% of my usage quota.</li>
             </ul></li>
     </ul>
     <ul class="right col30" id="profileCol">

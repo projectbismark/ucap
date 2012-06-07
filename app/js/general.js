@@ -202,11 +202,14 @@ var UCapManager = {
             } else {
                 width = 1.5*($(document).width()/5);
             }
+			
+			var windowHeight = $(document).height(); 
+			var height = $(document).height()-($(document).height()/6);
 
             $( "#modalBox" ).dialog({
                 minWidth: width,
-    			maxHeight: $(document).height()-($(document).height()/6),
-    			modal: true,
+    			height: height,
+				modal: true,
                 show: 'fade',
                 hide: 'fade',
                 position: ['center','center'],
