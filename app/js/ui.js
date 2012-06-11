@@ -702,7 +702,22 @@ function Support_clearActive(){
 }
 
 function Support_faqs() {
-
+	$('.faq-title').each(function() {
+		var faq = $(this);
+		var description = faq.next("div").slideUp(0);
+		faq.prop("state", false);
+    
+		faq.click(function() {
+			var state = faq.prop("state");
+			if (state)
+				faq.css("background", "url('images/arrow_right.png') no-repeat left center");
+			else
+				faq.css("background", "url('images/arrow_down.png') no-repeat left center");
+			faq.prop("state", !state);
+			
+      		description.slideToggle("slow");
+    	});
+  	});
 }
 
 

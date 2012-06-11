@@ -413,3 +413,10 @@ body{
     margin: 0;
     padding: 0;
 }
+
+#supportPage .faq-title {
+	background: url('../images/arrow_right.png') no-repeat left center;
+	padding: 0px 0px 0px 13px;
+	font-weight: bold;
+	cursor: pointer;
+}
