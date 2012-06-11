@@ -551,16 +551,25 @@ function Network_deviceOverview(obj) {
     }
 
     //Is Notification set?
-    if ($('#notifypercent').length > 0){
-        $('#notifypercent').val( item[8]  == null ? 50 : item[8]);
-        if(item[7] == "t"){
-            $('#notify').prop("checked", true);
-
-        } else {
-            $('#notify').prop("checked", false);
-            $('#notification li:last-child').slideToggle("show");
-        }
-    }
+	$('#notifypercent').val( item[8]  == null ? 50 : item[8]);
+	if(item[7] == "t"){
+        $('#notify').prop("checked", true);
+	} else {
+		$('#notify').prop("checked", false);
+	}
+	
+	Network_Device_toggleDeviceNotification();
+	
+//    if ($('#notifypercent').length > 0){
+//        $('#notifypercent').val( item[8]  == null ? 50 : item[8]);
+//        if(item[7] == "t"){
+//            $('#notify').prop("checked", true);
+//
+//        } else {
+//            $('#notify').prop("checked", false);
+//            $('#notification li:last-child').slideToggle("show");
+//        }
+//    }
 
     UCapManager.startScheduler({func:'Network_Device_usageProgress', args:'{uid:"' + obj.uid + '",did:"' + obj.did + '"}', scope:"element", freq:1300});
 }
@@ -614,6 +623,11 @@ function Network_Device_usageProgress(obj) {
     }
 }
 
+function Network_Device_toggleDeviceNotification()
+{
+	$('#notifypercent').prop('disabled', !$('#notify').prop("checked"));
+}
+
 function Network_Device_saveDeviceInfo() {
     var uid = UCapManager.escape($('#user-uid').val());
     var name = UCapManager.escape($('input[name="device-name"]').val());
@@ -627,23 +641,27 @@ function Network_Device_saveDeviceInfo() {
     UCapCore.setDeviceInfo({hid:UCapCore.household[0], uid:uid, did:did, name:name, details:details, photo:photo});
 
     var user = UCapCore.findUser({uid:uid});
-    var notifypercent = UCapManager.escape($('#notifypercent').val());
+    var notifypercent = parseInt(UCapManager.escape($('#notifypercent').val()), 10);
 
-    if((($('#notify').prop("checked") && item[7] == "f")) || ((!$('#notify').prop("checked")) && item[7] == "t")){
-        var notify;
-        if($('#notify').prop("checked") && item[7] == "f"){
-            $('#notification li:last-child').slideToggle("hide");
-            notify = "t";
-        } else {
-            $('#notification li:last-child').slideToggle("show");
-            notify = "f";
-        }
-        UCapCore.setDeviceInfoEx({hid:UCapCore.household[0], uid:uid, did:did, name:name, details:details, notify:notify, notifyperc:item[8], notified:user[5], photo:photo});
-    }
+//    if((($('#notify').prop("checked") && item[7] == "f")) || ((!$('#notify').prop("checked")) && item[7] == "t")){
+//        var notify;
+//        if($('#notify').prop("checked") && item[7] == "f"){
+//            $('#notification li:last-child').slideToggle("hide");
+//            notify = "t";
+//        } else {
+//            $('#notification li:last-child').slideToggle("show");
+//            notify = "f";
+//        }
+//        UCapCore.setDeviceInfoEx({hid:UCapCore.household[0], uid:uid, did:did, name:name, details:details, notify:notify, notifyperc:item[8], notified:user[5], photo:photo});
+//    }
+	
+	var notify = $('#notify').prop("checked") ? "t" : "f";
+	UCapCore.setDeviceInfoEx({hid:UCapCore.household[0], uid:uid, did:did, name:name, details:details, notify:notify, notifyperc:notifypercent, notified:UCapCore.users[1][5], photo:photo});
 
-    if(notifypercent != item[8]){
-        UCapCore.setDeviceInfoEx({hid:UCapCore.household[0], uid:uid, did:did, name:name, details:details, notify:item[7], notifyperc:notifypercent, notified:user[5], photo:photo});
-    }
+
+//    if(notifypercent != item[8]){
+//        UCapCore.setDeviceInfoEx({hid:UCapCore.household[0], uid:uid, did:did, name:name, details:details, notify:item[7], notifyperc:notifypercent, notified:user[5], photo:photo});
+//    }
 }
 
 

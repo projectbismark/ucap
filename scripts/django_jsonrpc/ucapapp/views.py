@@ -415,6 +415,10 @@ def user_logs_ex_dj(request,hid,start,end):
 
     return user_logs_ex(hid,start,end)
 
+@jsonrpc_method('ucap.get_device_usage_on_day')
+def get_device_usage_interval_dj(request,macs,date):
+    return user_mgmt.getDeviceUsageOnDay(macs,date)
+
 @jsonrpc_method('ucap.get_device_usage_interval')
 def get_device_usage_interval_dj(request,macs,start,end):
     return user_mgmt.getDeviceUsageInterval(macs,start,end)

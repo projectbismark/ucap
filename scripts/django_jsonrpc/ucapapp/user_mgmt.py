@@ -327,6 +327,10 @@ def moveDevice(hid,ouid,nuid,did):
     sql.run_insert_cmd("commit",conn=conn,prnt=prnt)
     return (1,"SUCCESS")
 
+def getDeviceUsageOnDay(macs,date):
+    gmacs = get_group(macs,"'")
+    cmd = "select devices.name, date(t.timestamp) as d, sum(t.bytes) from bismark_passive.bytes_per_device_per_hour as t,devices where t.mac_address in %s and devices.macid[1]=t.mac_address and t.timestamp='%s' group by devices.name,t.mac_address,d order by t.mac_address,d asc"%(gmacs,date) 
+
 def getDeviceUsageInterval(macs,start,end):
   gmacs = get_group(macs,"'")
   cmd = "select devices.name, date(t.timestamp) as d, sum(t.bytes) from bismark_passive.bytes_per_device_per_hour as t,devices where t.mac_address in %s and devices.macid[1]=t.mac_address and t.timestamp between '%s' and '%s' group by devices.name,t.mac_address,d order by t.mac_address,d asc"%(gmacs,start,end)
