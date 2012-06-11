@@ -692,6 +692,20 @@ function Reward_redemption() {
 }
 
 
+/* Support */
+function SupportPage() {
+	UCapManager.loadModule({tar:'userContent', src:'faqs', act:'faqs',func:'Support_faqs'});
+}
+
+function Support_clearActive(){
+    $('.activeDevice').remove();
+}
+
+function Support_faqs() {
+
+}
+
+
 /* Login */
 function signIn() {
     UCapCore.userLogin({username:$('#username').val(), passwd:$('#password').val()});

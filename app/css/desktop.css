@@ -400,4 +400,16 @@ body{
 	text-align: right;
 }
 
+/* Support Page */
+#supportPage .support-page h5 {
+    background: url('../images/overview.png') no-repeat 0.5em 0;
+}
 
+#supportPage .listPanel {
+    width: 100%;
+}
+
+#supportPage .listPanel #userList {
+    margin: 0;
+    padding: 0;
+}
