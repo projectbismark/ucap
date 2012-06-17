@@ -130,6 +130,10 @@ strong {
     font-family: arial, helvetica, sans-serif;
 }
 
+textarea {
+	resize: none;	
+}
+
 .allcaps {
     text-transform: uppercase;
 }
@@ -518,6 +522,10 @@ form.highlight {
     box-shadow: 0 0 2px rgba(0,0,0,0.4);
     color:#FFFFFF;
     text-shadow: 0 -1px rgba(0,0,0,0.3);
+}
+
+.error {
+	color: red;	
 }
 
 .error-toast, .notice-toast{

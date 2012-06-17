@@ -720,6 +720,51 @@ function Support_faqs() {
   	});
 }
 
+function Support_contact() {
+	var user = UCapCore.findUser({uid:localStorage['uid']});
+    user = UCapCore.users[user];
+	
+	var mForm = document.forms["contact_us_form"];
+	mForm.name.value = user[1];
+	mForm.email.value = user[8];
+}
+
+function Support_sendContactUsForm() {
+	var mForm = document.forms["contact_us_form"];
+		var mIssue = mForm.issue.value;
+		var mName = mForm.name.value;
+		var mEmail = mForm.email.value;
+		var mMessage = mForm.message.value;
+		
+		$.ajaxSetup (
+		{
+			cache: false
+		});
+		
+		var loadUrl = "lib/sendcontact.php";
+		var query = { issue: mIssue,
+					  name: mName,
+					  email: mEmail,
+					  message: mMessage };
+		
+		$.ajax ({
+			type: "POST",
+			url: loadUrl,
+			data: query,
+			dataType: "text",
+			async: false,
+			timeout: 5000, //5 seconds
+			success: function(data) 
+			{
+				$("#status").html(data);
+			},
+			error: function(jqXHR, textStatus, errorThrown) 
+			{
+				$("#status").html("<p class='error'>" + jqXHR.status + ": " + jqXHR.statusText + "</p>");
+			}
+		});
+}
+
 
 /* Login */
 function signIn() {

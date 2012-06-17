@@ -1,0 +1,28 @@
+<div>
+	<h6>Contact Us</h6>
+	
+	<div id="contact_us">
+		<form id="contact_us_form" onsubmit="return false;">
+			<p> Issue Summary: 
+				<select name="issue">
+					<option value="how_to">Learn about uCap</option>
+					<option value="bug_report">Bug Report</option>
+					<option value="general">General Question</option>
+				</select> 
+			</p>
+
+			<p> Your Full Name: <br/>
+				<input type="text" name="name" size="50" /> </p>
+				
+			<p> Your email address: <br/>
+				<input type="text" name="email" size="50" /> </p>
+					
+			<p> Your message: <br/>
+				<textarea rows="10" cols="110" name="message"></textarea> </p>
+			
+			<p> <input type="submit" value="Send" onclick="Support_sendContactUsForm()"></p>
+			
+			<p id="status"></p>
+		</form> 
+	</div>
+</div>
