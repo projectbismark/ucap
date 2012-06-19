@@ -329,7 +329,64 @@ def moveDevice(hid,ouid,nuid,did):
 
 def getDeviceUsageOnDay(macs,date):
     gmacs = get_group(macs,"'")
-    cmd = "select devices.name, date(t.timestamp) as d, sum(t.bytes) from bismark_passive.bytes_per_device_per_hour as t,devices where t.mac_address in %s and devices.macid[1]=t.mac_address and t.timestamp='%s' group by devices.name,t.mac_address,d order by t.mac_address,d asc"%(gmacs,date) 
+    start = date + ' 00:00:00+00'
+    end = date + ' 23:59:59+00'
+    cmd = "select devices.name, t.timestamp as d, t.bytes from bismark_passive.bytes_per_device_per_hour as t,devices where t.mac_address in %s and devices.macid[1]=t.mac_address and t.timestamp between '%s' and '%s' order by t.mac_address,d asc"%(gmacs,start,end)
+    #cmd = "select t.mac_address, t.timestamp as d, t.bytes from bismark_passive.bytes_per_device_per_hour as t where t.mac_address in %s and t.timestamp between '%s' and '%s' order by t.mac_address,d asc"%(gmacs, start, end)
+    res = sql.run_data_cmd(cmd)
+    
+    out = {}
+    tdate = datetime.datetime(*(time.strptime(start, "%Y-%m-%d %H:%M:%S+00")[0:6]))
+    one_hour = datetime.timedelta(hours=1)
+    index = 0
+    range = len(res)
+    while (index < range):
+        for x in xrange(24):
+            rec = res[index]
+            cdate = datetime.datetime(*(time.strptime(rec[1], "%Y-%m-%d %H:%M:%S+00")[0:6]))
+            sdate = tdate.strftime("%Y-%m-%d %H:%M:%S")
+            usage = 0
+            if cdate.hour == tdate.hour:
+                usage = rec[2]
+                index = index + 1
+            else:
+                usage = 0
+
+            try:
+                out[rec[0]].append((sdate,usage))
+            except:
+                out[rec[0]] = []
+                out[rec[0]].append((sdate,usage))
+            
+            tdate = tdate + one_hour
+
+    return out
+
+def getDomainUsageOnDay(nodeid,topn,date):
+    start = date + ' 00:00:00+00'
+    end = date + ' 23:59:59+00'
+    cmd = "select t.timestamp as d, t.domain, t.bytes as s from bismark_passive.bytes_per_domain_per_hour as t where t.node_id='%s' and t.timestamp between '%s' and '%s' order by d asc,s desc"%(nodeid,start,end)
+    res = sql.run_data_cmd(cmd)
+    
+    out = {}
+    # Deal with data from database first
+    for rec in res:
+        try:
+            if len(out[rec[0]]) < topn:
+                out[rec[0]].append((rec[1],rec[2]))
+        except:
+            out[rec[0]] = []
+            out[rec[0]].append((rec[1],rec[2]))
+
+    return out
+
+def getBytesOnDay(nodeid,date):
+    start = date + ' 00:00:00+00'
+    end = date + ' 23:59:59+00'
+    cmd = "select t.timestamp as d, t.bytes as s from bismark_passive.bytes_per_hour as t where t.node_id='%s' and t.timestamp between '%s' and '%s' order by d asc"%(nodeid,start,end)
+    res = sql.run_data_cmd(cmd)
+    
+    return res
 
 def getDeviceUsageInterval(macs,start,end):
   gmacs = get_group(macs,"'")

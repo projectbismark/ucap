@@ -432,5 +432,47 @@ var UCapCore = {
                 return i;
             }
         }
+    },
+	
+	getDeviceUsageOnDay:function(obj){
+        $.jsonRPC.request('ucap.get_device_usage_on_day', {params:[obj.devices,obj.date],
+            success:function (data) {
+                var result = data["result"];
+                if(obj.func)
+                    eval(obj.func + "({data:"+JSON.stringify(result)+"})");
+            },
+            error:function () {
+                UCapManager.notification("error", "Error: getDeviceUsageOnDay");
+            }
+        });
+        UCapCore.logAction({fname:'get_device_usage_on_day', params:obj.devices + ',' + obj.date});
+    },
+	
+	getDeviceDomainOnDay:function(obj){
+        $.jsonRPC.request('ucap.get_device_domain_on_day', {params:[obj.hid,obj.num,obj.date],
+            success:function (data) {
+                var result = data["result"];
+                if(obj.func)
+                    eval(obj.func + "({data:"+JSON.stringify(result)+"})"); //eval executes a function call based on function name (obj.func)
+            },
+            error:function () {
+                UCapManager.notification("error", "Oops! Looks like we don't have any history for that period.");
+            }
+        });
+        UCapCore.logAction({fname:'get_device_domain_on_day', params:obj.hid + ',' + obj.num + ',' + obj.date});
+    },
+	
+	getBytesOnDay:function(obj){
+        $.jsonRPC.request('ucap.get_bytes_on_day', {params:[obj.hid,obj.date],
+            success:function (data) {
+                var result = data["result"];
+                if(obj.func)
+                    eval(obj.func + "({data:"+JSON.stringify(result)+"})"); //eval executes a function call based on function name (obj.func)
+            },
+            error:function () {
+                UCapManager.notification("error", "Oops! Looks like we don't have any history for that period.");
+            }
+        });
+        UCapCore.logAction({fname:'get_device_domain_on_day', params:obj.hid + ',' + obj.date});
     }
 };
