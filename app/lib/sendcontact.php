@@ -1,5 +1,7 @@
 <?php
 
+require_once ("Mail.php");
+
 if ($_SERVER["REQUEST_METHOD"] == "POST")
 {
 	$to = "projectucap@googlegroups.com";
@@ -9,7 +11,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 	$email = $_POST["email"];
 	$message = $_POST["message"];
 	
-	$subject = "[uCap Site] " . $issue;
+	$from = $email;
+	$to = "ucap@projectbismark.net";
+	$subject = "[uCap Site Contact] " . $issue;
+	$headers = array ('From' => $from,
+					  'To' => $to,
+					  'Subject' => $subject);
+	
+	$host = "ssl://smtp.gmail.com";
+	$port = "465";
+	$username = "ucap.dev";
+	$password = "bismark123";
 	
 	/* Validate the input */
 	if (!validateName($name))
@@ -32,15 +44,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 	
 	/* Create header files */
 	$message = $name . " wrote,\n\n" . $message . "\n\nSent from uCap Contact Us Page";
-	$headers = "From: " . $email;
 	
 	/* Send email */
-	$ret = mail ($to, $subject, $message, $headers);
+	//$ret = mail ($to, $subject, $message, $headers);
+	$smtp = Mail::factory('smtp',
+						  array ('host' => $host,
+								 'port' => $port,
+								 'auth' => true,
+								 'username' => $username,
+								 'password' => $password));
+	$mail = $smtp->send($to, $headers, $message);
 	
-	if ($ret)
-		echo ("<p>Thank you for contacting us. We will respond to your issue as soon as possible!</p>");
-	else
+	if (PEAR::isError($mail))
+	{
+		//echo("<p>" . $mail->getMessage() . "</p>");
 		echo ("<p class='error'>Unable to send an email. Please try again later.</p>");
+	}
+	else 
+		echo ("<p>Thank you for contacting us. We will respond to your issue as soon as possible!</p>");
 }
 
 function validateName ($str)
