@@ -390,14 +390,29 @@ body{
     padding: 0;
 }
 
-#reward-overview
+#rewardOverviewPage table
 {
 	margin: 1em;
 }
 
-#reward-overview td
+#rewardOverviewPage #domain_list_table
 {
-	text-align: right;
+	width: 100%;	
+}
+
+#rewardOverviewPage #domain_list_table td
+{
+	vertical-align: top;
+	width: 50%;
+}
+
+#rewardOverviewPage #rangePicker{
+    margin: 1em 0;
+}
+
+#rewardOverviewPage #rangePicker li{
+    display: inline-block;
+    margin: 0;
 }
 
 /* Support Page */

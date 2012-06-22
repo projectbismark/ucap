@@ -290,6 +290,51 @@ var UCapViz = {
             credits:{enabled:false}
         });
     },
+	
+	drawHourlyUsage: function(obj){
+        new Highcharts.Chart({
+            chart: {
+                renderTo: obj.tar,
+                type: 'line'
+            },
+            title: {
+                text: obj.title ? obj.title : ''
+            },
+            legend: {
+                        layout: 'vertical',
+                        align: 'right',
+                        verticalAlign: 'top',
+                        x: 0,
+                        y: 50,
+                        borderWidth: 0
+            },
+            tooltip: {
+                formatter: function() {
+                    var d = new Date(this.x);
+                    d = d.toUTCString().split(" ");
+                    d = d[4] + " " + d[5];
+                    return '<b>'+ this.series.name +'</b><br/><em>Time: </em>'+ d +'<br/><em>Usage: </em>'+ this.y + 'MB';
+                },
+                borderWidth: 1
+            },
+            xAxis: {
+                        type: 'datetime',
+                        dateTimeLabelFormats: {
+                                day: '%e %b'
+                        },
+                        gridLineColor: "#E1E1E1"
+            		},
+            yAxis: {
+                    gridLineColor: "#E1E1E1",
+                    minorGridLineDashStyle: "Dot",
+                    title: {
+                        text: obj.yAxisLabel ? obj.yAxisLabel : ''
+                        }
+                    },
+            series: obj.data,
+            credits:{enabled:false}
+        });
+    },
 
     drawChart: function(obj) {
         new Highcharts.Chart({

@@ -675,16 +675,125 @@ function Reward_clearActive(){
 }
 
 function Reward_rewardOverview() {
-    UCapManager.startScheduler({func:'Network_Overview_householdUsage', scope:"element", freq:1000});
-    var dataArray = [];
-    for (var i in UCapCore.devices)
-    {    for(var j = 0, k = UCapCore.devices[i].length; j < k; j++){
-            var devicename = UCapCore.devices[i][j][1];
-            var deviceusage = (UCapCore.devices[i][j][6]/1048576);
-            dataArray.push([devicename,deviceusage]);
+    var today = new Date();
+    var date = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
+    date = $.datepicker.formatDate("dd M yy",date);
+
+    $("#date").val(date);
+    $( "#date").datepicker({
+        minDate: -180,
+        maxDate: -1,
+        dateFormat: "dd M yy"
+    });
+
+    Reward_rewardOverview_showUsage();
+}
+
+function Reward_rewardOverview_showUsage() {
+	var date = $.datepicker.parseDate("dd M yy",  $( "#date").val());
+    date = $.datepicker.formatDate( "yy-mm-dd", date);
+
+    var deviceList = [];
+    for(var x in UCapCore.devices){
+        for(var y in UCapCore.devices[x]){
+            deviceList.push(UCapCore.devices[x][y][0]);
         }
     }
-    UCapViz.drawChart({tar:'chartarea',data:dataArray});
+
+    UCapCore.getDeviceUsageOnDay({devices:deviceList,date:date,func:'Reward_rewardOverview_drawDeviceUsageGraph'});
+    UCapCore.getBytesOnDay({hid:UCapCore.household[0],date:date,func:'Reward_rewardOverview_drawBandwidthUsageGraph'});
+	UCapCore.getDeviceDomainOnDay({hid:UCapCore.household[0],num:5,date:date,func:'Reward_rewardOverview_showTopDomainList'});
+    
+    $('#rewardOverviewStat').slideDown('slow');
+}
+
+function Reward_rewardOverview_drawDeviceUsageGraph(obj) {
+    var dataSet = obj.data;
+    var dataArray = [];
+	var total = 0;
+	
+    for(var i in dataSet){
+        for(var j in dataSet[i]){
+            var temp = dataSet[i][j][0];
+            temp = temp.split(' ');
+			var date = temp[0].split('-');
+			var time = temp[1].split(':');
+            dataSet[i][j][0] = Date.UTC(date[0],date[1]-1,date[2],time[0],time[1],time[2]);
+            dataSet[i][j][1] = Math.round(parseInt(dataSet[i][j][1])/1048576);
+			total += dataSet[i][j][1];
+        }
+        dataArray.push({name:i,data:dataSet[i],borderWidth:0,shadow:false});
+    }
+	
+	if (total > 0) {
+    	UCapViz.drawHourlyUsage({tar:'usage_chartarea',data:dataArray,yAxisLabel:'Bandwidth Usage (MB)'});
+		$('#usage_status').empty();		
+	}
+	else {
+		var template = "There is no data for this period.";
+		$('#usage_status').html(template);
+		$('#usage_chartarea').empty();	
+	}
+}
+
+function Reward_rewardOverview_drawBandwidthUsageGraph(obj) {
+	var dataSet = obj.data;
+    var dataArray = [];
+	var total = 0;
+	
+    for(var i in dataSet){
+		var temp = dataSet[i][0];
+		temp = temp.split(' ');
+		var date = temp[0].split('-');
+		var time = temp[1].split(':');
+		dataSet[i][0] = Date.UTC(date[0],date[1]-1,date[2],time[0],time[1],time[2]);
+		dataSet[i][1] = Math.round(parseInt(dataSet[i][1])/1048576);
+		total += dataSet[i][1];
+    }
+	dataArray.push({showInLegend:false,name:"Bandwidth Usage per Hour",data:dataSet,borderWidth:0,shadow:false});
+	
+	if (total > 0) {
+    	UCapViz.drawHourlyUsage({tar:'bytes_chartarea',data:dataArray,yAxisLabel:'Bandwidth Usage (MB)'});
+		$('#bytes_status').empty();		
+	}
+	else {
+		var template = "There is no data for this period.";
+		$('#bytes_status').html(template);
+		$('#bytes_chartarea').empty();	
+	}
+}
+
+function Reward_rewardOverview_showTopDomainList(obj) {
+	var list = obj.data;
+	for (var entry in list) {
+		var date = entry.split(' ');
+		var time = date[1].split(':');
+		var hour = time[0];
+		var template = '<br/><table id="topdomains'+hour+'" class="tablesorter"><thead><tr><th>Domain</th><th>Usage (MB)</th></tr><thead><tbody>';
+	
+		var reset_template = "No data for this period."
+		for (var i = 0; i < 24; i++){
+			if ( i < 9)
+				$('#time0' + i).html(reset_template);
+			else
+				$('#time0' + i).html(reset_template);
+		}	
+	
+		for(var x in list[entry]){
+			var domain = list[entry][x][0];
+			if (domain == null)
+				domain = "unknown";
+			
+			var usage = (list[entry][x][1]/ 1048576).toFixed(1);
+			template += '<tr><td><strong>'+domain+'</strong></td><td>'+usage+'</td></tr>';
+		}
+		template += '</tbody></table>';
+		
+		$('#time' + hour).html(template);
+		$('#topdomains' + hour).tablesorter({
+			//sortList: [[1,1]]	
+		});
+	}
 }
 
 function Reward_redemption() {

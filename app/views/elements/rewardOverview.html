@@ -1,16 +1,90 @@
-<div>
-	<h6>Summary</h6>
-	<table id="reward-overview" cellpadding="10">
-		<tr>
-			<th>Points for this month</th>
-			<td>4000</td>
-		</tr>
-		<tr>
-			<th>Total available points</th>
-			<td>9000</td>
-		</tr>
-	</table>
-	
-	<h6>Bandwidth Usage</h6>
-	<div id="chartarea"></div>
+<div id="rewardOverviewPage">
+    <div class="block reward-overview-page">
+		<h6>Summary</h6>
+		<table cellpadding="10">
+			<tr>
+				<th>Points for this month</th>
+				<td>4000</td>
+			</tr>
+			<tr>
+				<th>Total available points</th>
+				<td>9000</td>
+			</tr>
+		</table>
+		
+		<ul id="rangePicker" class="textCenter">
+			<li>Display household usage on</li>
+			<li>&nbsp;<span class="dateInputSet"><input type="text" id="date" value="" class="datepicker" readonly="readonly" /></span></li>
+			<li style="padding-left:12px;">&nbsp;<input type="button" value="Go!" onmousedown="Reward_rewardOverview_showUsage();" /></li>
+		</ul>
+		
+		<div id="rewardOverviewStat" class="hidden">
+			<h6>Device Usage Per Hour</h6>
+			<h3 id="usage_status" class="textCenter"></h3>
+			<div id="usage_chartarea"></div>
+			<br/><br/>
+			
+			<h6>Bandwidth Usage Per Hour</h6>
+			<h3 id="bytes_status" class="textCenter"></h3>
+			<div id="bytes_chartarea"></div>
+			<br/><br/>
+			
+			<h6>Top Domains Visited Per Hour</h6>
+			<h3 id="domain_list_status" class="textCenter"></h3>
+			<div id="domain_list">
+				<table id="domain_list_table">
+					<tbody>
+						<tr>
+							<td><h3 class='textCenter'>00:00:00</h3><span id='time00' class'domain_list_data'>No data for this period.</span></td>
+							<td><h3 class='textCenter'>12:00:00</h3><span id='time12' class'domain_list_data'>No data for this period.</span></td>
+						</tr>
+						<tr>
+							<td><h3 class='textCenter'>01:00:00</h3><span id='time01' class'domain_list_data'>No data for this period.</span></td>
+							<td><h3 class='textCenter'>13:00:00</h3><span id='time13' class'domain_list_data'>No data for this period.</span></td>
+						</tr>
+						<tr>
+							<td><h3 class='textCenter'>02:00:00</h3><span id='time02' class'domain_list_data'>No data for this period.</span></td>
+							<td><h3 class='textCenter'>14:00:00</h3><span id='time14' class'domain_list_data'>No data for this period.</span></td>
+						</tr>
+						<tr>
+							<td><h3 class='textCenter'>03:00:00</h3><span id='time03' class'domain_list_data'>No data for this period.</span></td>
+							<td><h3 class='textCenter'>15:00:00</h3><span id='time15' class'domain_list_data'>No data for this period.</span></td>
+						</tr>
+						<tr>
+							<td><h3 class='textCenter'>04:00:00</h3><span id='time04' class'domain_list_data'>No data for this period.</span></td>
+							<td><h3 class='textCenter'>16:00:00</h3><span id='time16' class'domain_list_data'>No data for this period.</span></td>
+						</tr>
+						<tr>
+							<td><h3 class='textCenter'>05:00:00</h3><span id='time05' class'domain_list_data'>No data for this period.</span></td>
+							<td><h3 class='textCenter'>17:00:00</h3><span id='time17' class'domain_list_data'>No data for this period.</span></td>
+						</tr>
+						<tr>
+							<td><h3 class='textCenter'>06:00:00</h3><span id='time06' class'domain_list_data'>No data for this period.</span></td>
+							<td><h3 class='textCenter'>18:00:00</h3><span id='time18' class'domain_list_data'>No data for this period.</span></td>
+						</tr>
+						<tr>
+							<td><h3 class='textCenter'>07:00:00</h3><span id='time07' class'domain_list_data'>No data for this period.</span></td>
+							<td><h3 class='textCenter'>19:00:00</h3><span id='time19' class'domain_list_data'>No data for this period.</span></td>
+						</tr>
+						<tr>
+							<td><h3 class='textCenter'>08:00:00</h3><span id='time08' class'domain_list_data'>No data for this period.</span></td>
+							<td><h3 class='textCenter'>20:00:00</h3><span id='time20' class'domain_list_data'>No data for this period.</span></td>
+						</tr>
+						<tr>
+							<td><h3 class='textCenter'>09:00:00</h3><span id='time09' class'domain_list_data'>No data for this period.</span></td>
+							<td><h3 class='textCenter'>21:00:00</h3><span id='time21' class'domain_list_data'>No data for this period.</span></td>
+						</tr>
+						<tr>
+							<td><h3 class='textCenter'>10:00:00</h3><span id='time10' class'domain_list_data'>No data for this period.</span></td>
+							<td><h3 class='textCenter'>22:00:00</h3><span id='time22' class'domain_list_data'>No data for this period.</span></td>
+						</tr>
+						<tr>
+							<td><h3 class='textCenter'>11:00:00</h3><span id='time11' class'domain_list_data'>No data for this period.</span></td>
+							<td><h3 class='textCenter'>23:00:00</h3><span id='time23' class'domain_list_data'>No data for this period.</span></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
 </div>
