@@ -336,30 +336,32 @@ def getDeviceUsageOnDay(macs,date):
     res = sql.run_data_cmd(cmd)
     
     out = {}
-    tdate = datetime.datetime(*(time.strptime(start, "%Y-%m-%d %H:%M:%S+00")[0:6]))
+    # Deal with data from database first
+    for rec in res:
+        try:
+            out[rec[0]].append((rec[1][0:len(rec[1]) - 3],rec[2]))
+        except:
+            out[rec[0]] = []
+            out[rec[0]].append((rec[1][0:len(rec[1]) - 3],rec[2]))
+
+    # Fill in 0s for missing hours (where usage is actually 0)
     one_hour = datetime.timedelta(hours=1)
-    index = 0
-    range = len(res)
-    while (index < range):
+    for dev in out:
+        idate = datetime.datetime(*(time.strptime(start, "%Y-%m-%d %H:%M:%S+00")[0:6]))
+        index = 0
         for x in xrange(24):
-            rec = res[index]
-            cdate = datetime.datetime(*(time.strptime(rec[1], "%Y-%m-%d %H:%M:%S+00")[0:6]))
-            sdate = tdate.strftime("%Y-%m-%d %H:%M:%S")
-            usage = 0
-            if cdate.hour == tdate.hour:
-                usage = rec[2]
-                index = index + 1
-            else:
-                usage = 0
-
+            sdate = idate.strftime("%Y-%m-%d %H:%M:%S")
             try:
-                out[rec[0]].append((sdate,usage))
+                tdate = datetime.datetime(*(time.strptime(out[dev][index][0], "%Y-%m-%d %H:%M:%S")[0:6]))
+                if idate.hour == tdate.hour:
+                    index = index + 1
+                else:
+                    out[dev].append((sdate,0))
             except:
-                out[rec[0]] = []
-                out[rec[0]].append((sdate,usage))
-            
-            tdate = tdate + one_hour
-
+                out[dev].append((sdate,0))
+            idate = idate + one_hour
+        out[dev] = sorted(out[dev], key=lambda dates: dates[0])
+    
     return out
 
 def getDomainUsageOnDay(nodeid,topn,date):
@@ -371,12 +373,13 @@ def getDomainUsageOnDay(nodeid,topn,date):
     out = {}
     # Deal with data from database first
     for rec in res:
+        date = rec[0][0:len(rec[0]) - 3]
         try:
-            if len(out[rec[0]]) < topn:
-                out[rec[0]].append((rec[1],rec[2]))
+            if len(out[date]) < topn:
+                out[date].append((rec[1],rec[2]))
         except:
-            out[rec[0]] = []
-            out[rec[0]].append((rec[1],rec[2]))
+            out[date] = []
+            out[date].append((rec[1],rec[2]))
 
     return out
 
@@ -386,7 +389,33 @@ def getBytesOnDay(nodeid,date):
     cmd = "select t.timestamp as d, t.bytes as s from bismark_passive.bytes_per_hour as t where t.node_id='%s' and t.timestamp between '%s' and '%s' order by d asc"%(nodeid,start,end)
     res = sql.run_data_cmd(cmd)
     
-    return res
+    out = []
+    # Deal with data from database first
+    for rec in res:
+        try:
+            out.append((rec[0][0:len(rec[0]) - 3],rec[1]))
+        except:
+            out = []
+            out.append((rec[0][0:len(rec[0]) - 3],rec[1]))
+    
+    # Fill in 0s for missing hours (where usage is actually 0)
+    one_hour = datetime.timedelta(hours=1)
+    idate = datetime.datetime(*(time.strptime(start, "%Y-%m-%d %H:%M:%S+00")[0:6]))
+    index = 0
+    for x in xrange(24):
+        sdate = idate.strftime("%Y-%m-%d %H:%M:%S")
+        try:
+            tdate = datetime.datetime(*(time.strptime(out[index][0], "%Y-%m-%d %H:%M:%S")[0:6]))
+            if idate.hour == tdate.hour:
+                index = index + 1
+            else:
+                out.append((sdate,0))
+        except:
+            out.append((sdate,0))
+        idate = idate + one_hour
+    out = sorted(out, key=lambda dates: dates[0])
+    
+    return out
 
 def getDeviceUsageInterval(macs,start,end):
   gmacs = get_group(macs,"'")
