@@ -429,9 +429,25 @@ body{
     padding: 0;
 }
 
+#supportPage #faq-list {
+	
+}
+
 #supportPage .faq-title {
-	background: url('../images/arrow_right.png') no-repeat left center;
+	background: url('../images/arrow_right.png') no-repeat center left;
 	padding: 0px 0px 0px 13px;
 	font-weight: bold;
 	cursor: pointer;
+}
+
+#supportPage .faq-description {
+	margin-left: 20px;
+}
+
+#supportPage .faq-description ol {
+	list-style: decimal;
+}
+
+#supportPage .faq-description ul {
+	list-style: disc;
 }

@@ -2,37 +2,186 @@
 	<h6>FAQs</h6>
 	
 	<div id="faq-list">
-		<p class="faq-title">Question 1</p>
+		<p class="faq-title">How do I configure BISmark router? How do I change the SSID (Wi-Fi name)	
+		and the password for my router?</p>
 		<div class="faq-description">
-			<p>Bacon ipsum dolor sit amet chicken sausage jerky shoulder, tongue tail 
-			   spare ribs frankfurter. Chuck ham hock rump ham corned beef tri-tip. Venison 
-			   brisket swine andouille. Biltong tenderloin tri-tip pork, ham hock shankle 
-			   venison t-bone fatback strip steak. Speck beef tongue shank, shoulder pancetta 
-			   jerky brisket ball tip pork chop biltong. Bresaola shank beef ribs pork loin 
-			   biltong. Spare ribs brisket ground round meatball, bresaola boudin bacon short 
-			   ribs.</p>
-	
-			<p>Speck strip steak ham hock, bacon pastrami ground round ball tip spare ribs 
-			   turducken turkey. Meatloaf turducken pork belly frankfurter, biltong drumstick 
-			   corned beef. Leberkas chicken andouille pork beef ribs shankle. Pig strip steak 
-			   flank kielbasa corned beef. Brisket chuck filet mignon salami, beef ribeye short 
-			   loin shankle meatball ham sirloin turkey sausage hamburger.</p>
+			<p>Start by visiting http://myrouter.projectbismark.net. You can learn more about 
+			   the project from this start page, as well as accessing the router configuration 
+			   page by clicking the "Configure your router" link. The default username and 
+			   password are:</p>
+
+			<ul>
+				<li>Username: <code>root</code></li>
+				<li>Password: <code>bismark123</code></li>
+			</ul>
+
+			<p>Please refer to <a href="http://projectbismark.net/participant/quickstart/">
+			   BISmark Documentation</a> for a complete tutorial.</p>
 		</div>
 		
-		<p class="faq-title">Question 2</p>
+		<p class="faq-title">How do I set up uCap on my BISmark router??</p>
 		<div class="faq-description">
-			<p>Turducken capicola leberkas, short loin bresaola jowl pork belly meatloaf tri-tip 
-			   short ribs beef salami frankfurter. Jerky filet mignon short ribs bresaola, swine 
-			   andouille ham hock shankle drumstick. Cow venison t-bone, ball tip leberkas 
-			   turducken beef ribs shank strip steak sirloin ham swine sausage tenderloin. 
-			   Jerky turkey rump, tongue tenderloin swine venison ground round ham hock kielbasa 
-			   tail. Fatback tri-tip prosciutto frankfurter ham hock. Chuck leberkas pastrami, 
-			   turkey tongue flank venison hamburger pork belly andouille corned beef cow 
-			   shoulder filet mignon. Capicola prosciutto fatback meatloaf.</p>
-	
-			<p>Pork chop pastrami boudin, brisket turducken pork loin shoulder leberkas. 
-			   Venison brisket meatball boudin tenderloin. Pig kielbasa beef ribs meatball. 
-			   Chuck pig boudin fatback flank andouille.</p>
+			<p>In order to run uCap, your must have the latest Quirm firmware installed on your
+			   BISmark router. Please refer to 
+			   <a href="https://github.com/projectbismark/projectbismark/wiki/BISmark-firmware-installation">
+			   BISmark documentation</a> on how to install or upgrade Quirm firmware.</p>
+			<p>You can enable uCap on your BISmark router by following these steps:</p>
+			<ol>
+				<li>Go to <a href="http://myrouter.projectbismark.net">Project BISmark Dashboard</a></li>
+				<li>Click <strong>Configure Your Router</strong></li>
+				<li>Login using your router admin credential</li>
+				<li>Go to <strong>BISmark</strong> > <strong>Experiments</strong></li>
+				<li>Under uCap experiment, check <strong>Participate in this experiment</strong>. 
+					You may want to review the privacy statement before.</li>
+				<li>Click <strong>Save</strong></li>
+			</ol>
+			<p><img src="images/bismark_ucap.png" /></p>
+		</div>
+		
+		<p class="faq-title">How do I manage my whitelist?</p>
+		<div class="faq-description">
+			<p>uCap monitors traffic from sites listed in the whitelist. This data is used to 
+			   calculate your <strong>Top Domains Visited</strong> that can be found under 
+			   <strong>History &amp; Status</strong>. You can manage your whitelist by following
+			   these steps:</p>
+			<ol>
+				<li>Go to <a href="http://myrouter.projectbismark.net">Project BISmark Dashboard</a></li>
+				<li>Click <strong>Configure Your Router</strong></li>
+				<li>Login using your router admin credential</li>
+				<li>Go to <strong>BISmark</strong> > <strong>Passive Measurements</strong>. Note: you 
+					have to enable uCap first in order to see this option.</li>
+				<li>Click on remove button <img src="images/bismark_remove.gif" /> in order to remove a site from the whitelist</li>
+				<li>Click on add button <img src="images/bismark_add.gif" /> in order to add a site to the whitelist</li>
+				<li>Click <strong>Save</strong></li>
+			<ol>
+		</div>
+
+		<p class="faq-title">How do I find my MAC address?</p>
+		<div class="faq-description">
+			<p>MAC address is used as device identifier on the <strong>Network</strong> page. 
+			   The first six hexadecimal digits corresponds to the actual MAC address, and 
+			   the remaining six is a hash of the actual MAC address. We do this way because 
+			   of privacy concern. Therefore, in order to figure out which MAC address corresponds 
+			   to which device, you have to match the first 6 hexadecimal digits.</p>
+			
+			<p>In order to find your computer's MAC address, you have to do some basic command
+			   line. Following section will go through in detail about how to find MAC address
+			   in Windows, MacOS, and Linux. Note that <code>$</code> symbol means that you 
+			   have to type the command in the terminal</p>
+			   
+			<p>How to open terminal (Windows command line / MS-DOS prompt):</p>
+			<ol>
+				<li>Click <strong>Start</strong></li>
+				<li>Click <strong>Run</strong></li>
+				<li>Type <strong>cmd</strong> and press <strong>Enter</strong></li>
+			</ol>
+			
+			<p>How to open terminal in OS X (MacBook and iMac):</p>
+			<ol>
+				<li>Click <strong>Utilities</strong> on the dock</li>
+				<li>Click <strong>Terminal</strong></li>
+			</ol>
+			
+			<p>How to open terminal in Linux:<br/>
+			   This varies from one distribution to another distribution. Please refer to your 
+			   distribution manual.</p>
+			   
+			<p>How to find MAC address on Unix system (OS X and Linux):</p>
+			<ul>
+				<li>Open terminal or console</li>
+				<li><code>$ ifconfig</code></li>
+				<li>List of network interface will be displayed on your screen. Note for <strong>
+					ether</strong> attribute since this is the MAC address of that particular
+					network interfaces. Most of the time, <code>en0</code> will be your main
+					network interface.</li>
+			</ul>
+			
+			<p>How to find MAC address on Unix system Windows:</p>
+			<ul>
+				<li>Open command line</li>
+				<li><code>$ ipconfig /all</code></li>
+				<li>It will have similar output to the Unix system.</li>
+			</ul>
+			
+			<p>How to find MAC address on iOS (iPhone, iPad, and iPod Touch):</p>
+			<ul>
+				<li>Go to <strong>Settings</strong> > <strong>General</strong> > <strong>About</strong></li>
+				<li><strong>Wi-Fi Address</strong> is the MAC address of that particular iOS device.</li>
+			</ul>
+			
+			<p>How to find MAC address on Android (phone and tablet):</p>
+			<ul>
+				<li>Go to <strong>Settings</strong> > <strong>About Phone (Tablet)</strong></li>
+				<li>Look for <strong>Wi-Fi MAC address</strong> in the submenu. This submenu may be 
+				    different from manufacture to manufacture.</li>
+			</ul>
+		</div>
+		
+		<div class="separator"></div>
+		
+		<p class="faq-title">How do I set a cap on a device?</p>
+		<div class="faq-description">
+			<p>Go to <strong>Network</strong> > <strong>Manager</strong>. Select the devices that 
+			   you want to cap by checking the box next to the devices' name, and specify the 
+			   cap amount in MB. The total allocated bandwidth (or sum of all the caps you've 
+			   set) will be displayed on the bottom of the list.</p>
+		</div>
+		
+		<p class="faq-title">How do I set up a household bandwidth cap?</p>
+		<div class="faq-description">
+			<p>Go to <strong>Network</strong> > <strong>Manager</strong>. Specify your bandwidth 
+			   allocation that is given by your ISP in the <strong>Total Monthly Bandwidth Cap</strong>.</p>
+		</div>
+		
+		<p class="faq-title">How do I indicate when my billing cycle resets?</p>
+		<div class="faq-description">
+			<p>Go to <strong>Network</strong> > <strong>Manager</strong>. Specify your billing 
+			   cycle in <strong>The Next Billing Cycle Ends On</strong> field.</p>
+		</div>
+		
+		<p class="faq-title">How do I set up a notification email to tell me when a device is 
+		about to reach its cap?</p>
+		<div class="faq-description">
+			<p>Go to <strong>Network</strong> page and select the device that you want to set 
+			   notification on. Check the notification box and specify when you want to be 
+			   notified in the usage quota box. You will be notified by email when the device 
+			   reaches the amount you specify e.g. at 80% of usage.</p>
+		</div>
+		
+		<p class="faq-title">How do I check the history of usage?</p>
+		<div class="faq-description">
+			<p>Go to <strong>History &amp; Status</strong> page:</p>
+			<ul>
+				<li><strong>Device Usage</strong> - shows device’s bandwidth usage in MB in 
+					the given data range</li>
+				<li><strong>Top Domains Visited</strong> - shows the most visited domain and 
+					its percentage in the given date range. See <em>"How do I manage my 
+					whitelist?"</em> section to add sites to the list of sites that you 
+					wish to track.</li>
+			</ul>
+		</div>
+		
+		<p class="faq-title">How do I change my account information?</p>
+		<div class="faq-description">
+			<p>Go to <strong>Settings</strong> > <strong>Account</strong> to change your 
+			   password and household details</p>
+		</div>
+		
+		<p class="faq-title">Why do I see some discrepancy between bandwidth usage in the <strong>Network</strong> 
+		page and <strong>History &amp; Status</strong> page providing the same date range?</p>
+		<div class="faq-description">
+			<p>The bandwidth usage in the <strong>Network</strong> page is calculated in smaller 
+			   granularity compared to the household usage in <strong>History &amp; Status</strong> page. 
+			   We calculate the household usage on daily basis, where as the bandwidth usage 
+			   is calculated every hour.</p>
+		</div>
+		
+		<div class="separator"></div>
+		
+		<p class="faq-title">If I have any further questions, whom should I contact?</p>
+		<div class="faq-description">
+			<p>Please contact us using our contact form that can be found at 
+			   <strong>Support</strong> > <strong>Contact Us</strong></p>
 		</div>
 	</div>
 </div>

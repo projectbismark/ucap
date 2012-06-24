@@ -850,12 +850,14 @@ function Support_sendContactUsForm() {
 			cache: false
 		});
 		
+		var ajax_load = "<p><img src='mages/ajax-loader.gif' />Sending email...</p>";
 		var loadUrl = "lib/sendcontact.php";
 		var query = { issue: mIssue,
 					  name: mName,
 					  email: mEmail,
 					  message: mMessage };
 		
+		$("#status").html(ajax_load);
 		$.ajax ({
 			type: "POST",
 			url: loadUrl,
