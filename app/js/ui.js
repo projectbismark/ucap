@@ -702,6 +702,7 @@ function Reward_rewardOverview_showUsage() {
 
     UCapCore.getDeviceUsageOnDay({devices:deviceList,date:date,func:'Reward_rewardOverview_drawDeviceUsageGraph'});
     UCapCore.getBytesOnDay({hid:UCapCore.household[0],date:date,func:'Reward_rewardOverview_drawBandwidthUsageGraph'});
+	UCapCore.getBytesOnDay({hid:UCapCore.household[0],date:date,func:'Reward_rewardOverview_drawBandwidthUsagePercentage'});
 	UCapCore.getDeviceDomainOnDay({hid:UCapCore.household[0],num:5,date:date,func:'Reward_rewardOverview_showTopDomainList'});
     
     $('#rewardOverviewStat').slideDown('slow');
@@ -741,7 +742,7 @@ function Reward_rewardOverview_drawBandwidthUsageGraph(obj) {
     var dataArray = [];
 	var total = 0;
 	
-    for(var i in dataSet){
+    for(var i in dataSet) {
 		var temp = dataSet[i][0];
 		temp = temp.split(' ');
 		var date = temp[0].split('-');
@@ -761,6 +762,20 @@ function Reward_rewardOverview_drawBandwidthUsageGraph(obj) {
 		$('#bytes_status').html(template);
 		$('#bytes_chartarea').empty();	
 	}
+}
+
+function Reward_rewardOverview_drawBandwidthUsagePercentage(obj) {
+	var dataSet = obj.data;
+    var dataArray = [];
+    for (var i in dataSet) {
+		var temp = dataSet[i][0];
+		temp = temp.split(' ');
+	
+		var time = temp[1];
+		var usage = Math.round(parseInt(dataSet[i][1])/1048576);
+		dataArray.push([time,usage]);
+    }
+    UCapViz.drawHourlyUsageChart({tar:'bytes_piechartarea',data:dataArray});
 }
 
 function Reward_rewardOverview_showTopDomainList(obj) {

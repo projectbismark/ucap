@@ -427,6 +427,10 @@ def get_device_domain_on_day_dj(request,nodeid,topn,date):
 def get_bytes_on_day_dj(request,nodeid,date):
     return user_mgmt.getBytesOnDay(nodeid,date)
 
+@jsonrpc_method('ucap.get_all_bytes_on_day')
+def get_all_bytes_on_day_dj(request,date):
+    return user_mgmt.getAllBytesOnDay(date)
+
 @jsonrpc_method('ucap.get_device_usage_interval')
 def get_device_usage_interval_dj(request,macs,start,end):
     return user_mgmt.getDeviceUsageInterval(macs,start,end)
@@ -435,7 +439,9 @@ def get_device_usage_interval_dj(request,macs,start,end):
 def get_device_domain_interval_dj(request,nodeid,topn,start,end):
     return user_mgmt.getDomainUsageInterval(nodeid,topn,start,end)
 
-
+@jsonrpc_method('ucap.get_oui')
+def get_oui_dj(request,oui_addr):
+    return user_mgmt.getOUI(oui_addr)
 
 #######
 

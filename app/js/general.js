@@ -375,5 +375,46 @@ var UCapViz = {
             }],
             credits:{enabled:false}
         });
+    },
+	
+	drawHourlyUsageChart: function(obj) {
+        new Highcharts.Chart({
+            chart: {
+                renderTo: obj.tar
+            },
+            title: {
+                text: obj.title ? obj.title : ''
+            },
+            tooltip: {
+                formatter: function() {
+                    return '<b>'+ this.point.name +'</b>: '+ this.percentage.toFixed(2) +' %'+ ' ('+ this.point.y.toFixed(2) +' MB)';
+                }
+            },
+            legend: {
+            			layout: 'vertical',
+            			align: 'right',
+            			verticalAlign: 'top',
+            			x: 0,
+            			y: 50,
+            			borderWidth: 0
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: false
+                    },
+                    showInLegend: false
+                }
+            },
+            series: [{
+                type: 'pie',
+                data: obj.data,
+                borderWidth:1,
+                shadow:false
+            }],
+            credits:{enabled:false}
+        });
     }
 };

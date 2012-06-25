@@ -404,6 +404,17 @@ body{
 {
 	vertical-align: top;
 	width: 50%;
+	border-bottom: #EBEBEB dotted 1px;
+}
+
+#rewardOverviewPage #domain_list_table table.tablesorter thead tr th, table.tablesorter tfoot tr th 
+{
+	min-width: 120px;
+}
+
+#rewardOverviewPage #domain_list_table table.tablesorter tbody td 
+{
+	border: none;
 }
 
 #rewardOverviewPage #rangePicker{

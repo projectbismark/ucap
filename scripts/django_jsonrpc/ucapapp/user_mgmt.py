@@ -5,6 +5,7 @@ import pgsql as sql
 from gen import *
 import time
 import datetime
+#from netaddr import *
 
 def addHouse(hid,address,details,photofilepath=''):
     unittype = 'household'
@@ -417,6 +418,25 @@ def getBytesOnDay(nodeid,date):
     
     return out
 
+def getAllBytesOnDay(date):
+    # Get all node_id
+    cmd = "select distinct t.node_id from bismark_passive.bytes_per_hour as t"
+    res = sql.run_data_cmd(cmd)
+    
+    # Get byte usage for each node_id
+    out = {}
+    for rec in res:
+        out[rec[0]] = []
+        total = 0;
+        bytes = getBytesOnDay(rec[0], date)
+        for byte in bytes:
+            total += byte[1]
+            out[rec[0]].append(byte)
+        if total == 0:
+            del out[rec[0]]
+
+    return out
+
 def getDeviceUsageInterval(macs,start,end):
   gmacs = get_group(macs,"'")
   cmd = "select devices.name, date(t.timestamp) as d, sum(t.bytes) from bismark_passive.bytes_per_device_per_hour as t,devices where t.mac_address in %s and devices.macid[1]=t.mac_address and t.timestamp between '%s' and '%s' group by devices.name,t.mac_address,d order by t.mac_address,d asc"%(gmacs,start,end)
@@ -477,3 +497,10 @@ def getDomainUsageInterval(nodeid,topn,start,end):
       otot += domd[1]
   out["other"].append((tot-otot,(tot-otot)/tot)) 
   return out 
+
+def getOUI(oui_addr):
+    out = []
+    oui = OUI(oui_addr)
+    for i in range(oui.reg_count):
+        out.append(oui.registration(i).org)
+    return out
