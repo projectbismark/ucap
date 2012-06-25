@@ -405,7 +405,7 @@ var UCapViz = {
                     dataLabels: {
                         enabled: false
                     },
-                    showInLegend: false
+                    showInLegend: true
                 }
             },
             series: [{
