@@ -683,7 +683,7 @@ function Reward_rewardOverview() {
     $("#date").val(date);
     $( "#date").datepicker({
         minDate: -180,
-        maxDate: -1,
+        maxDate: 5,
         dateFormat: "dd M yy"
     });
 
@@ -768,32 +768,42 @@ function Reward_rewardOverview_drawBandwidthUsageGraph(obj) {
 function Reward_rewardOverview_drawBandwidthUsagePercentage(obj) {
 	var dataSet = obj.data;
     var dataArray = [];
+	var total = 0;
+	
     for (var i in dataSet) {
 		var temp = dataSet[i][0];
 		temp = temp.split(' ');
 	
 		var time = temp[1];
 		var usage = Math.round(parseInt(dataSet[i][1])/1048576);
+		total += usage;
 		dataArray.push([time,usage]);
     }
-    UCapViz.drawHourlyUsageChart({tar:'bytes_piechartarea',data:dataArray});
+	
+	if (total > 0) {
+    	UCapViz.drawHourlyUsageChart({tar:'bytes_piechartarea',data:dataArray});
+	}
+	else {
+		$('#bytes_piechartarea').empty();	
+	}
 }
 
 function Reward_rewardOverview_showTopDomainList(obj) {
 	var list = obj.data;
+	
+	var reset_template = "No data for this period."
+	for (var i = 0; i < 24; i++){
+		if ( i <= 9)
+			$('#time0' + i).html(reset_template);
+		else
+			$('#time' + i).html(reset_template);
+	}	
+	
 	for (var entry in list) {
 		var date = entry.split(' ');
 		var time = date[1].split(':');
 		var hour = time[0];
-		var template = '<br/><table id="topdomains'+hour+'" class="tablesorter"><thead><tr><th>Domain</th><th>Usage (MB)</th></tr><thead><tbody>';
-	
-		var reset_template = "No data for this period."
-		for (var i = 0; i < 24; i++){
-			if ( i < 9)
-				$('#time0' + i).html(reset_template);
-			else
-				$('#time0' + i).html(reset_template);
-		}	
+		var template = '<table id="topdomains'+hour+'" class="tablesorter"><thead><tr><th>Domain</th><th>Usage (MB)</th></tr><thead><tbody>';
 	
 		for(var x in list[entry]){
 			var domain = list[entry][x][0];
