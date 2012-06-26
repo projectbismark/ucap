@@ -524,7 +524,7 @@ form.highlight {
     text-shadow: 0 -1px rgba(0,0,0,0.3);
 }
 
-.error {
+.error-red {
 	color: red;	
 }
 
