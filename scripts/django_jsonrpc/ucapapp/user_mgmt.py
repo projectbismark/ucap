@@ -5,7 +5,6 @@ import pgsql as sql
 from gen import *
 import time
 import datetime
-#from netaddr import *
 
 def addHouse(hid,address,details,photofilepath=''):
     unittype = 'household'
@@ -497,10 +496,3 @@ def getDomainUsageInterval(nodeid,topn,start,end):
       otot += domd[1]
   out["other"].append((tot-otot,(tot-otot)/tot)) 
   return out 
-
-def getOUI(oui_addr):
-    out = []
-    oui = OUI(oui_addr)
-    for i in range(oui.reg_count):
-        out.append(oui.registration(i).org)
-    return out

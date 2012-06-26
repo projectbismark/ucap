@@ -544,6 +544,9 @@ function Network_deviceOverview(obj) {
         $('span[name="device-name"]').html(item[1]);
     }
     $('#device-mac-address').html(item[0]);
+	
+	//OUI
+	UCapCore.getOUI({oui_addr:item[0].substring(0,6),func:'Network_Device_getOUI'});
 
     if ($('input[name="device-description"]').length > 0){
         $('input[name="device-description"]').val(item[2]);
@@ -573,6 +576,10 @@ function Network_deviceOverview(obj) {
 //    }
 
     UCapManager.startScheduler({func:'Network_Device_usageProgress', args:'{uid:"' + obj.uid + '",did:"' + obj.did + '"}', scope:"element", freq:1300});
+}
+
+function Network_Device_getOUI(obj) {
+    $('#device-mac-oui').html(obj.data[0]);
 }
 
 function Network_Device_selectAvatar(obj) {

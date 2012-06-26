@@ -486,6 +486,20 @@ var UCapCore = {
                 UCapManager.notification("error", "Oops! Looks like we don't have any history for that period.");
             }
         });
-        UCapCore.logAction({fname:'get_device_domain_on_day', params:obj.hid + ',' + obj.date});
-    }
+        UCapCore.logAction({fname:'get_bytes_on_day', params:obj.hid + ',' + obj.date});
+    },
+	
+	getOUI: function(obj){
+		$.jsonRPC.request('ucap.get_oui', {params:[obj.oui_addr],
+            success:function (data) {
+                var result = data["result"];
+                if(obj.func)
+                    eval(obj.func + "({data:"+JSON.stringify(result)+"})"); //eval executes a function call based on function name (obj.func)
+            },
+            error:function () {
+                UCapManager.notification("error", "Error: getOUI");
+            }
+        });
+        UCapCore.logAction({fname:'getOUI', params:obj.hid + ',' + obj.date});
+	}
 };

@@ -2,6 +2,7 @@
 import sys
 sys.path.append('.')
 
+from netaddr import *
 import pgsql as sql
 from gen import *
 import user_mgmt
@@ -14,6 +15,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 import StringIO
 import Image
+
 
 SECURITY_BEEF = False
 
@@ -441,7 +443,7 @@ def get_device_domain_interval_dj(request,nodeid,topn,start,end):
 
 @jsonrpc_method('ucap.get_oui')
 def get_oui_dj(request,oui_addr):
-    return user_mgmt.getOUI(oui_addr)
+    return getOUI(oui_addr)
 
 #######
 
@@ -1337,3 +1339,10 @@ def update_house_startdate(hid,startdate):
     res = sql.run_insert_cmd(cmd2)
     
     return [res]
+
+def getOUI(oui_addr):
+    out = []
+    oui = OUI(oui_addr.encode("ascii"))
+    for i in range(oui.reg_count):
+        out.append(oui.registration(i).org)
+    return out
