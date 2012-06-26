@@ -381,6 +381,7 @@ function Network_Overview_householdUsage() {
 			var billingDay = UCapCore.household[7].split(' ');
 			billingDay = billingDay[0].split('-');
 			billingDay = new Date(billingDay[0], billingDay[1] - 1, billingDay[2]);
+			billingDay.setMonth(billingDay.getMonth( ) + 1 );
 			
 			var daysRemaining = differenceInDays(today, billingDay);
 			if (daysRemaining == 1)

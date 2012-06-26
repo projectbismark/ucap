@@ -106,6 +106,19 @@ var UCapCore = {
             success:function (data) {
                 var result = data["result"];
                 UCapCore.household = result[1];
+				
+				/* Temporary hack for updating billing cycle */
+				var today = new Date();
+				var billingday = UCapCore.household[7].split(' ');
+				billingday = billingday[0].split('-');
+				billingday = new Date(billingday[0], billingday[1], billingday[2]);
+			
+				var daysRemaining = differenceInDays(today, billingday);
+				if (daysRemaining < 0) {
+					var date = $.datepicker.formatDate( "yy-mm-dd", billingday);
+					UCapCore.household[7] = date + " 00:00:00";
+					UCapCore.updateStartDate({hid:UCapCore.household[0],start:date});
+				}
             },
             error:function () {
                 UCapManager.notification("error", "Error: getHouse."); //Oops! You are not connected to the internet. Please try again later.
