@@ -720,6 +720,8 @@ function Reward_rewardOverview_drawDeviceUsageGraph(obj) {
     var dataSet = obj.data;
     var dataArray = [];
 	var total = 0;
+	var timezone = getTimeZone();
+	timezone = timezone * -1 * 60 * 60 * 1000;
 	
     for(var i in dataSet){
         for(var j in dataSet[i]){
@@ -727,7 +729,8 @@ function Reward_rewardOverview_drawDeviceUsageGraph(obj) {
             temp = temp.split(' ');
 			var date = temp[0].split('-');
 			var time = temp[1].split(':');
-            dataSet[i][j][0] = Date.UTC(date[0],date[1]-1,date[2],time[0],time[1],time[2]);
+			var utc = Date.UTC(date[0],date[1]-1,date[2],time[0],time[1],time[2]);
+            dataSet[i][j][0] = utc + timezone;
             dataSet[i][j][1] = Math.round(parseInt(dataSet[i][j][1])/1048576);
 			total += dataSet[i][j][1];
         }
@@ -749,13 +752,16 @@ function Reward_rewardOverview_drawBandwidthUsageGraph(obj) {
 	var dataSet = obj.data;
     var dataArray = [];
 	var total = 0;
+	var timezone = getTimeZone();
+	timezone = timezone * -1 * 60 * 60 * 1000;
 	
     for(var i in dataSet) {
 		var temp = dataSet[i][0];
 		temp = temp.split(' ');
 		var date = temp[0].split('-');
 		var time = temp[1].split(':');
-		dataSet[i][0] = Date.UTC(date[0],date[1]-1,date[2],time[0],time[1],time[2]);
+		var utc = Date.UTC(date[0],date[1]-1,date[2],time[0],time[1],time[2]);
+		dataSet[i][0] = utc + timezone;
 		dataSet[i][1] = Math.round(parseInt(dataSet[i][1])/1048576);
 		total += dataSet[i][1];
     }
@@ -776,12 +782,21 @@ function Reward_rewardOverview_drawBandwidthUsagePercentage(obj) {
 	var dataSet = obj.data;
     var dataArray = [];
 	var total = 0;
+	var timezone = getTimeZone();
+	timezone = -1 * timezone;
 	
     for (var i in dataSet) {
 		var temp = dataSet[i][0];
 		temp = temp.split(' ');
-	
-		var time = temp[1];
+		
+		var time = temp[1].split(':');
+		var date = new Date();
+		date.setHours(parseInt(time[0],10) + timezone);
+		var hour = "" + date.getHours();
+		if (hour.length == 1)
+			hour = "0" + hour;
+		time = hour + ":00:00";
+		
 		var usage = Math.round(parseInt(dataSet[i][1])/1048576);
 		total += usage;
 		dataArray.push([time,usage]);
@@ -797,6 +812,8 @@ function Reward_rewardOverview_drawBandwidthUsagePercentage(obj) {
 
 function Reward_rewardOverview_showTopDomainList(obj) {
 	var list = obj.data;
+	var timezone = getTimeZone();
+	timezone = -1 * timezone;
 	
 	var reset_template = "No data for this period."
 	for (var i = 0; i < 24; i++){
@@ -807,9 +824,14 @@ function Reward_rewardOverview_showTopDomainList(obj) {
 	}	
 	
 	for (var entry in list) {
-		var date = entry.split(' ');
+		var date = entry.split(' ');	
 		var time = date[1].split(':');
-		var hour = time[0];
+		var date = new Date();
+		date.setHours(parseInt(time[0],10) + timezone);
+		var hour = "" + date.getHours();
+		if (hour.length == 1)
+			hour = "0" + hour;
+		
 		var template = '<table id="topdomains'+hour+'" class="tablesorter"><thead><tr><th>Domain</th><th>Usage (MB)</th></tr><thead><tbody>';
 	
 		for(var x in list[entry]){

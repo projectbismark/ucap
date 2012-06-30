@@ -327,10 +327,18 @@ def moveDevice(hid,ouid,nuid,did):
     sql.run_insert_cmd("commit",conn=conn,prnt=prnt)
     return (1,"SUCCESS")
 
-def getDeviceUsageOnDay(macs,date):
+def getDeviceUsageOnDay(macs,date,timezone):
     gmacs = get_group(macs,"'")
-    start = date + ' 00:00:00+00'
-    end = date + ' 23:59:59+00'
+    arr_date = date.split('-')
+    sdate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), 0, 0, 0)
+    edate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), 23, 59, 59)
+    delta = datetime.timedelta(hours=timezone)
+    
+    sdate = sdate + delta
+    edate = edate + delta
+    start = sdate.strftime("%Y-%m-%d %H:%M:%S+00")
+    end = edate.strftime("%Y-%m-%d %H:%M:%S+00")
+    
     cmd = "select devices.name, t.timestamp as d, t.bytes from bismark_passive.bytes_per_device_per_hour as t,devices where t.mac_address in %s and devices.macid[1]=t.mac_address and t.timestamp between '%s' and '%s' order by t.mac_address,d asc"%(gmacs,start,end)
     #cmd = "select t.mac_address, t.timestamp as d, t.bytes from bismark_passive.bytes_per_device_per_hour as t where t.mac_address in %s and t.timestamp between '%s' and '%s' order by t.mac_address,d asc"%(gmacs, start, end)
     res = sql.run_data_cmd(cmd)
@@ -364,9 +372,17 @@ def getDeviceUsageOnDay(macs,date):
     
     return out
 
-def getDomainUsageOnDay(nodeid,topn,date):
-    start = date + ' 00:00:00+00'
-    end = date + ' 23:59:59+00'
+def getDomainUsageOnDay(nodeid,topn,date,timezone):    
+    arr_date = date.split('-')
+    sdate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), 0, 0, 0)
+    edate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), 23, 59, 59)
+    delta = datetime.timedelta(hours=timezone)
+    
+    sdate = sdate + delta
+    edate = edate + delta
+    start = sdate.strftime("%Y-%m-%d %H:%M:%S+00")
+    end = edate.strftime("%Y-%m-%d %H:%M:%S+00")
+    
     cmd = "select t.timestamp as d, t.domain, t.bytes as s from bismark_passive.bytes_per_domain_per_hour as t where t.node_id='%s' and t.timestamp between '%s' and '%s' order by d asc,s desc"%(nodeid,start,end)
     res = sql.run_data_cmd(cmd)
     
@@ -383,9 +399,17 @@ def getDomainUsageOnDay(nodeid,topn,date):
 
     return out
 
-def getBytesOnDay(nodeid,date):
-    start = date + ' 00:00:00+00'
-    end = date + ' 23:59:59+00'
+def getBytesOnDay(nodeid,date,timezone):
+    arr_date = date.split('-')
+    sdate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), 0, 0, 0)
+    edate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), 23, 59, 59)
+    delta = datetime.timedelta(hours=timezone)
+    
+    sdate = sdate + delta
+    edate = edate + delta
+    start = sdate.strftime("%Y-%m-%d %H:%M:%S+00")
+    end = edate.strftime("%Y-%m-%d %H:%M:%S+00")
+    
     cmd = "select t.timestamp as d, t.bytes as s from bismark_passive.bytes_per_hour as t where t.node_id='%s' and t.timestamp between '%s' and '%s' order by d asc"%(nodeid,start,end)
     res = sql.run_data_cmd(cmd)
     
@@ -417,7 +441,7 @@ def getBytesOnDay(nodeid,date):
     
     return out
 
-def getAllBytesOnDay(date):
+def getAllBytesOnDay(date,timezone):
     # Get all node_id
     cmd = "select distinct t.node_id from bismark_passive.bytes_per_hour as t"
     res = sql.run_data_cmd(cmd)
@@ -427,7 +451,7 @@ def getAllBytesOnDay(date):
     for rec in res:
         out[rec[0]] = []
         total = 0;
-        bytes = getBytesOnDay(rec[0], date)
+        bytes = getBytesOnDay(rec[0], date, timezone)
         for byte in bytes:
             total += byte[1]
             out[rec[0]].append(byte)

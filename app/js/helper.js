@@ -448,7 +448,8 @@ var UCapCore = {
     },
 	
 	getDeviceUsageOnDay:function(obj){
-        $.jsonRPC.request('ucap.get_device_usage_on_day', {params:[obj.devices,obj.date],
+		var timezone = getTimeZone();
+        $.jsonRPC.request('ucap.get_device_usage_on_day', {params:[obj.devices,obj.date,timezone],
             success:function (data) {
                 var result = data["result"];
                 if(obj.func)
@@ -462,7 +463,8 @@ var UCapCore = {
     },
 	
 	getDeviceDomainOnDay:function(obj){
-        $.jsonRPC.request('ucap.get_device_domain_on_day', {params:[obj.hid,obj.num,obj.date],
+		var timezone = getTimeZone();
+        $.jsonRPC.request('ucap.get_device_domain_on_day', {params:[obj.hid,obj.num,obj.date,timezone],
             success:function (data) {
                 var result = data["result"];
                 if(obj.func)
@@ -476,7 +478,8 @@ var UCapCore = {
     },
 	
 	getBytesOnDay:function(obj){
-        $.jsonRPC.request('ucap.get_bytes_on_day', {params:[obj.hid,obj.date],
+		var timezone = getTimeZone();
+        $.jsonRPC.request('ucap.get_bytes_on_day', {params:[obj.hid,obj.date,timezone],
             success:function (data) {
                 var result = data["result"];
                 if(obj.func)
@@ -502,4 +505,5 @@ var UCapCore = {
         });
         UCapCore.logAction({fname:'getOUI', params:obj.hid + ',' + obj.date});
 	}
+
 };

@@ -312,7 +312,7 @@ var UCapViz = {
                 formatter: function() {
                     var d = new Date(this.x);
                     d = d.toUTCString().split(" ");
-                    d = d[4] + " " + d[5];
+                    d = d[4] + " " + d[5] + getTimeZone();
                     return '<b>'+ this.series.name +'</b><br/><em>Time: </em>'+ d +'<br/><em>Usage: </em>'+ this.y + 'MB';
                 },
                 borderWidth: 1
@@ -387,7 +387,7 @@ var UCapViz = {
             },
             tooltip: {
                 formatter: function() {
-                    return '<b>'+ this.point.name +'</b>: '+ this.percentage.toFixed(2) +' %'+ ' ('+ this.point.y.toFixed(2) +' MB)';
+                    return '<b>'+ this.point.name +' GMT' + getTimeZone() +'</b>: '+ this.percentage.toFixed(2) +' %'+ ' ('+ this.point.y.toFixed(2) +' MB)';
                 }
             },
             legend: {
