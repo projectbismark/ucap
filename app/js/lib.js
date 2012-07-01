@@ -23,11 +23,13 @@ function numericOnly(evt)
     return true
 }
 
-
+/**
+ * Returns the time difference between UTC time and local time.
+ */
 function getTimeZone()
 {
 	var timezone = new Date().getTimezoneOffset();
-	timezone = (-1) * timezone;
+	//timezone = (-1) * timezone;
 	timezone = Math.floor(timezone / 60);
 	
 	return timezone;

@@ -690,7 +690,7 @@ function Reward_rewardOverview() {
     $("#date").val(date);
     $( "#date").datepicker({
         minDate: -180,
-        maxDate: 5,
+        maxDate: -1,
         dateFormat: "dd M yy"
     });
 
