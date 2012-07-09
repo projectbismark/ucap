@@ -104,7 +104,10 @@ function Settings_saveTimeZoneInfo() {
 
 function Settings_setTimeZoneInfo(obj) {
 	var timezone = obj["data"][1][1];
-	$('select[name="household-time-zone"]').val(timezone);
+	if (timezone != null)
+		$('select[name="household-time-zone"]').val(timezone);
+	else
+		$('select[name="household-time-zone"]').val(0);
 }
 
 function Setting_point() {

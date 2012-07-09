@@ -23,7 +23,7 @@ CREATE TABLE unit_tmpl (
 
 CREATE TABLE households (
 	LIKE unit_tmpl,
-	tzone tzone_t,
+	tzone tzone_t default 0,
 	address address_t,
 	digest md5_t PRIMARY KEY
 );
