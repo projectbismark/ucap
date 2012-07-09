@@ -504,6 +504,32 @@ var UCapCore = {
             }
         });
         UCapCore.logAction({fname:'getOUI', params:obj.hid + ',' + obj.date});
+	},
+	
+	setTimezone: function(obj){
+		$.jsonRPC.request('ucap.set_timezone', {params:[obj.hid, obj.timezone],
+            success:function () {
+                UCapManager.notification("notice", "Time Zone information has been updated!");
+            },
+            error:function () {
+                UCapManager.notification("error", "Error: setTimezone");
+            }
+        });
+        UCapCore.logAction({fname:'setTimezone', params:obj.hid + ',' + obj.timezone});
+	},
+	
+	getTimezone: function(obj){
+		$.jsonRPC.request('ucap.get_timezone', {params:[obj.hid],
+            success:function (data) {
+                var result = data["result"];
+                if(obj.func)
+                    eval(obj.func + "({data:"+JSON.stringify(result)+"})"); //eval executes a function call based on function name (obj.func)
+            },
+            error:function () {
+                UCapManager.notification("error", "Error: getTimezone");
+            }
+        });
+        UCapCore.logAction({fname:'getTimezone', params:obj.hid});
 	}
 
 };

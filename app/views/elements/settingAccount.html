@@ -3,6 +3,39 @@
 	<ul class="left col80">
 		<li><div class="inputField"><label>Household Address</label><input title="Household Address" name="household-address" type="text" onchange="Settings_saveAccountInfo()"/></div><div class="helperText">Enter a name for your household.</div></li>
 		<li><div class="inputField"><label>Household Description</label><input title="Household Description" name="household-details" type="text" onchange="Settings_saveAccountInfo()"/></div><div class="helperText">Would you like to enter a few words to describe your account/household?</div></li>
+		<li><div class="inputField"><label>Time Zone </label>
+				<select title="Time Zone" name="household-time-zone" onchange="Settings_saveTimeZoneInfo()">
+					<option value="-12">UTC-12</option>
+					<option value="-11">UTC-11</option>
+					<option value="-10">UTC-10</option>
+					<option value="-9">UTC-9</option>
+					<option value="-8">UTC-8</option>
+					<option value="-7">UTC-7</option>
+					<option value="-6">UTC-6</option>
+					<option value="-5">UTC-5</option>
+					<option value="-4">UTC-4</option>
+					<option value="-3">UTC-3</option>
+					<option value="-2">UTC-2</option>
+					<option value="-1">UTC-1</option>
+					<option value="0">UTC+0</option>
+					<option value="1">UTC+1</option>
+					<option value="2">UTC+2</option>
+					<option value="3">UTC+3</option>
+					<option value="4">UTC+4</option>
+					<option value="5">UTC+5</option>
+					<option value="6">UTC+6</option>
+					<option value="7">UTC+7</option>
+					<option value="8">UTC+8</option>
+					<option value="9">UTC+9</option>
+					<option value="10">UTC+10</option>
+					<option value="11">UTC+11</option>
+					<option value="12">UTC+12</option>
+					<option value="13">UTC+13</option>
+					<option value="14">UTC+14</option>
+				</select>
+			</div>
+			<div class="helperText">What is your time zone?</div>
+		</li>
 		<li><input id="user-uid" name="uid" type="hidden" value=""/></li>
 		<li class="separator"></li>
 		<li><div class="inputField"><label>Account Name</label><input title="Account Name" name="account-name" type="text" onchange="Settings_saveAccountInfo()"/></div><div class="helperText">What's your name?</div></li>

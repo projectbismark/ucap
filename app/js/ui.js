@@ -28,10 +28,8 @@ function Setting_account() {
     $('input[name="account-name"]').val(user[1]);
     $('input[name="account-email"]').val(user[8]);
     $('#profileCol .profilePic').attr('src', 'images/user_avatars/' + picture + '.jpg');
-}
-
-function Setting_point() {
 	
+	UCapCore.getTimezone({hid:UCapCore.household[0], func:'Settings_setTimeZoneInfo'});
 }
 
 function Settings_saveAccountInfo(){
@@ -97,6 +95,68 @@ function Settings_updateAccountPassword(){
         UCapCore.changePassword({email:user[8],oldPass:oldPass,newPass:newPass});
         Settings_toggleChangePassword();
     }
+}
+
+function Settings_saveTimeZoneInfo() {
+	var timezone = $('select[name="household-time-zone"]').val();
+	UCapCore.setTimezone({hid:UCapCore.household[0], timezone:timezone});
+}
+
+function Settings_setTimeZoneInfo(obj) {
+	var timezone = obj["data"][1][1];
+	$('select[name="household-time-zone"]').val(timezone);
+}
+
+function Setting_point() {
+	$('input[name="peak-hours-start"]').ptTimeSelect({
+		containerClass: "timeCntr",
+		containerWidth: "350px",
+		setButtonLabel: "Select",
+		minutesLabel: "Minute",
+		hoursLabel: "Hour",
+		onClose: function(i) {
+			var peakHoursStart = $(i).val();
+			var peakHoursEnd = $('input[name="peak-hours-end"]').val();
+			
+			if (peakHoursEnd != "")
+			{
+				var delta = timeCompareTo(peakHoursStart, peakHoursEnd);
+				if (delta == 1)
+				{
+					// peakHoursStart > peakHoursEnd
+					$('input[name="peak-hours-start"]').val(peakHoursEnd);
+				}
+			}
+		}
+	});
+	
+	$('input[name="peak-hours-end"]').ptTimeSelect({
+		containerClass: "timeCntr",
+		containerWidth: "350px",
+		setButtonLabel: "Select",
+		minutesLabel: "Minute",
+		hoursLabel: "Hour",
+		onClose: function(i) {
+			var peakHoursStart = $('input[name="peak-hours-start"]').val();
+			var peakHoursEnd = $(i).val();
+			
+			if (peakHoursStart != "")
+			{
+				var delta = timeCompareTo(peakHoursStart, peakHoursEnd);
+				if (delta == 1)
+				{
+					// peakHoursStart > peakHoursEnd
+					$('input[name="peak-hours-end"]').val(peakHoursStart);
+				}
+			}
+		}
+	});
+}
+
+function Settings_savePointInfo(){
+    var peakHoursStart = $('input[name="peak-hours-start"]').val();
+	var peakHoursEnd = $('input[name="peak-hours-end"]').val();
+    var pointsPerByte = $('input[name="points-per-byte"]').val();
 }
 
 /* History Page */

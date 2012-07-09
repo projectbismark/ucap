@@ -445,6 +445,15 @@ def get_device_domain_interval_dj(request,nodeid,topn,start,end):
 def get_oui_dj(request,oui_addr):
     return getOUI(oui_addr)
 
+@jsonrpc_method('ucap.set_timezone')
+def set_timezone_dj(request,hid, timezone):
+    return setTimezone(hid, timezone)
+
+@jsonrpc_method('ucap.get_timezone')
+def get_timezone_dj(request,hid):
+    return getTimezone(hid)
+
+
 #######
 
 def check_uid_existence(hid,uid):
@@ -1346,3 +1355,30 @@ def getOUI(oui_addr):
     for i in range(oui.reg_count):
         out.append(oui.registration(i).org)
     return out
+
+def setTimezone(hid, timezone):
+    unittype = 'household'
+    tab = unitTables[unittype]
+    digest = get_digest(hid=hid)
+    cmd = "update %s set "%(tab)
+    if timezone == '':
+        return [1,["SUCCESS"]]
+    else:
+        cmd = "%s tzone=%d"%(cmd,int(timezone))
+    cmd = "%s where digest = '%s'"%(cmd,digest)
+    res = sql.run_insert_cmd(cmd)
+    try:
+        return [1,["SUCCESS"]]
+    except:
+        return [0,['ERROR: Could not update table']]
+
+def getTimezone(hid):
+    unittype = 'household'
+    tab = unitTables[unittype]
+    digest = get_digest(hid=hid)
+    cmd = "select h.id, h.tzone from %s as h where h.digest = '%s'"%(tab,digest)
+    res = sql.run_data_cmd(cmd)
+    try:
+        return [1,(res[0][0], res[0][1])]
+    except:
+        return [0,('ERROR: No match found')]

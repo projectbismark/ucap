@@ -1,3 +1,10 @@
-<div>
-	<h6>This is a Point Settings</h6>
-</div>
+<form id="pointInfo">
+
+	<ul class="left col80">
+		<li><div class="inputField"><label>Peak Hours Start At</label><input title="Peak Hours Start at" name="peak-hours-start" type="text" onchange="" readonly="readonly"/></div><div class="helperText">When does the peak hours start?</div></li>
+		<li><div class="inputField"><label>Peak Hours End At</label><input title="Peak Hours Ends at" name="peak-hours-end" type="text" onchange="" readonly="readonly"/></div><div class="helperText">When does peak hours end?</div></li>
+		<li><div class="inputField"><label>Points per Byte</label><input title="Points per Byte" name="points-per-byte" type="text" onkeypress="return numericOnly(event)" onchange=""/></div><div class="helperText">Enter point per byte value.</div></li>
+		<li class="controls textRight"><input type="button" onmousedown="Settings_savePointInfo()" value="Save"/></li>
+	</ul>
+
+</form>
