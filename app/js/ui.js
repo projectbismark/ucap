@@ -746,6 +746,16 @@ function Reward_clearActive(){
 }
 
 function Reward_rewardOverview() {
+	/* Statistics */
+	var previousMilestone = $("#reward-overview-table-previous-milestone").html();
+	var currentMilestone = $("#reward-overview-table-current-milestone").html();
+	
+	previousMilestone = parseInt(previousMilestone, 10);
+	currentMilestone = parseInt(currentMilestone, 10);
+	var shifted = previousMilestone - currentMilestone;
+	$("#reward-overview-table-bandwidth-shift").html(shifted);
+	
+	/* Graphs */
     var today = new Date();
     var date = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
     date = $.datepicker.formatDate("dd M yy",date);

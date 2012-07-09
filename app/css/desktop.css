@@ -377,6 +377,10 @@ body{
 }
 
 /* Reward Page */
+#reward-overview-table th {
+	text-align: right;
+}
+
 #rewardPage .reward-page h5 {
     background: url('../images/overview.png') no-repeat 0.5em 0;
 }
