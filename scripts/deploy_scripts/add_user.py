@@ -32,6 +32,7 @@ def adduser_params():
 
     while 1:
         user_id = raw_input("\nEnter User ID (as email address): ")
+        user_id = user_id.lower();
         if not re.match(r"^[A-Za-z0-9\.\+_-]+@[A-Za-z0-9\._-]+\.[a-zA-Z]*$", user_id):
             print 'Invalid email address. Input again.'
             continue
