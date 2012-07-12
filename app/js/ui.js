@@ -781,10 +781,11 @@ function Reward_rewardOverview_showUsage() {
         }
     }
 
-    UCapCore.getDeviceUsageOnDay({devices:deviceList,date:date,func:'Reward_rewardOverview_drawDeviceUsageGraph'});
+    UCapCore.getDeviceUsageOnDay({hid:UCapCore.household[0],devices:deviceList,date:date,func:'Reward_rewardOverview_drawDeviceUsageGraph'});
     UCapCore.getBytesOnDay({hid:UCapCore.household[0],date:date,func:'Reward_rewardOverview_drawBandwidthUsageGraph'});
 	UCapCore.getBytesOnDay({hid:UCapCore.household[0],date:date,func:'Reward_rewardOverview_drawBandwidthUsagePercentage'});
-	UCapCore.getDeviceDomainOnDay({hid:UCapCore.household[0],num:5,date:date,func:'Reward_rewardOverview_showTopDomainList'});
+	UCapCore.getShiftableUsage({hid:UCapCore.household[0],date:date,func:'Reward_rewardOverview_drawShiftableUsageGraph'});
+	UCapCore.getDeviceDomainOnDay({hid:UCapCore.household[0],num:-1,date:date,func:'Reward_rewardOverview_showTopDomainList'});
     
     $('#rewardOverviewStat').slideDown('slow');
 }
@@ -848,6 +849,38 @@ function Reward_rewardOverview_drawBandwidthUsageGraph(obj) {
 		var template = "There is no data for this period.";
 		$('#bytes_status').html(template);
 		$('#bytes_chartarea').empty();	
+	}
+}
+
+function Reward_rewardOverview_drawShiftableUsageGraph(obj) {
+	var dataSet = obj.data;
+    var dataArray = [];
+	var total = 0;
+	var timezone = getTimeZone();
+	timezone = timezone * -1 * 60 * 60 * 1000;
+	
+    for(var i in dataSet){
+        for(var j in dataSet[i]){
+            var temp = dataSet[i][j][0];
+            temp = temp.split(' ');
+			var date = temp[0].split('-');
+			var time = temp[1].split(':');
+			var utc = Date.UTC(date[0],date[1]-1,date[2],time[0],time[1],time[2]);
+            dataSet[i][j][0] = utc + timezone;
+            dataSet[i][j][1] = Math.round(parseInt(dataSet[i][j][1])/1048576);
+			total += dataSet[i][j][1];
+        }
+        dataArray.push({name:i,data:dataSet[i],borderWidth:0,shadow:false});
+    }
+	
+	if (total > 0) {
+    	UCapViz.drawHourlyUsage({tar:'ex_shiftable_usage_chartarea',data:dataArray,yAxisLabel:'Bandwidth Usage (MB)'});
+		$('#ex_shiftable_usage_status').empty();		
+	}
+	else {
+		var template = "There is no data for this period.";
+		$('#ex_shiftable_usage_status').html(template);
+		$('#ex_shiftable_usage_chartarea').empty();	
 	}
 }
 

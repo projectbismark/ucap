@@ -391,7 +391,7 @@ def getDomainUsageOnDay(nodeid,topn,date,timezone):
     for rec in res:
         date = rec[0][0:len(rec[0]) - 3]
         try:
-            if len(out[date]) < topn:
+            if topn < 0 or len(out[date]) < topn :
                 out[date].append((rec[1],rec[2]))
         except:
             out[date] = []
@@ -520,3 +520,41 @@ def getDomainUsageInterval(nodeid,topn,start,end):
       otot += domd[1]
   out["other"].append((tot-otot,(tot-otot)/tot)) 
   return out 
+
+def getPeakHoursUsage(hid,milestone,start,end):
+    return 100
+
+def getShiftableUsage(nodeid,date,timezone):
+    #Shiftable domains
+    shiftable = ['akamai.net',
+                 'amazonaws.com',
+                 'llnwd.net']
+    
+    res = getDomainUsageOnDay(nodeid,-1,date,timezone)
+    
+    out = {}
+    out['shiftable'] = []
+    out['nonshiftable'] = []
+    
+    arr_date = date.split('-')
+    idate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), 0, 0, 0)
+    delta = datetime.timedelta(hours=timezone)
+    idate = idate + delta
+    one_hour = datetime.timedelta(hours=1)
+    for x in xrange(24):
+        sdate = idate.strftime("%Y-%m-%d %H:%M:%S")
+        rec = res[sdate]
+        
+        shiftable_usage = 0
+        non_shiftable_usage = 0
+        for entry in rec:
+            domain = entry[0]
+            if domain in shiftable:
+                shiftable_usage += entry[1]
+            else:
+                non_shiftable_usage += entry[1]
+
+        out['shiftable'].append([sdate, shiftable_usage])
+        out['nonshiftable'].append([sdate, non_shiftable_usage])
+        idate = idate + one_hour
+    return out

@@ -448,8 +448,7 @@ var UCapCore = {
     },
 	
 	getDeviceUsageOnDay:function(obj){
-		var timezone = getTimeZone();
-        $.jsonRPC.request('ucap.get_device_usage_on_day', {params:[obj.devices,obj.date,timezone],
+        $.jsonRPC.request('ucap.get_device_usage_on_day', {params:[obj.hid,obj.devices,obj.date],
             success:function (data) {
                 var result = data["result"];
                 if(obj.func)
@@ -459,12 +458,11 @@ var UCapCore = {
                 UCapManager.notification("error", "Error: getDeviceUsageOnDay");
             }
         });
-        UCapCore.logAction({fname:'get_device_usage_on_day', params:obj.devices + ',' + obj.date});
+        UCapCore.logAction({fname:'get_device_usage_on_day', params:obj.hid + ',' + obj.devices + ',' + obj.date});
     },
 	
 	getDeviceDomainOnDay:function(obj){
-		var timezone = getTimeZone();
-        $.jsonRPC.request('ucap.get_device_domain_on_day', {params:[obj.hid,obj.num,obj.date,timezone],
+        $.jsonRPC.request('ucap.get_device_domain_on_day', {params:[obj.hid,obj.num,obj.date],
             success:function (data) {
                 var result = data["result"];
                 if(obj.func)
@@ -478,8 +476,7 @@ var UCapCore = {
     },
 	
 	getBytesOnDay:function(obj){
-		var timezone = getTimeZone();
-        $.jsonRPC.request('ucap.get_bytes_on_day', {params:[obj.hid,obj.date,timezone],
+        $.jsonRPC.request('ucap.get_bytes_on_day', {params:[obj.hid,obj.date],
             success:function (data) {
                 var result = data["result"];
                 if(obj.func)
@@ -530,6 +527,20 @@ var UCapCore = {
             }
         });
         UCapCore.logAction({fname:'getTimezone', params:obj.hid});
-	}
+	},
+	
+	getShiftableUsage:function(obj){
+        $.jsonRPC.request('ucap.get_shiftable_usage', {params:[obj.hid,obj.date],
+            success:function (data) {
+                var result = data["result"];
+                if(obj.func)
+                    eval(obj.func + "({data:"+JSON.stringify(result)+"})"); //eval executes a function call based on function name (obj.func)
+            },
+            error:function () {
+                UCapManager.notification("error", "Oops! Looks like we don't have any history for that period.");
+            }
+        });
+        UCapCore.logAction({fname:'getShiftableUsage', params:obj.hid + ',' + obj.date});
+    }
 
 };

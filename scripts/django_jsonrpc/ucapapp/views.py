@@ -2,6 +2,7 @@
 import sys
 sys.path.append('.')
 
+import datetime
 from netaddr import *
 import pgsql as sql
 from gen import *
@@ -418,20 +419,20 @@ def user_logs_ex_dj(request,hid,start,end):
     return user_logs_ex(hid,start,end)
 
 @jsonrpc_method('ucap.get_device_usage_on_day')
-def get_device_usage_on_day_dj(request,macs,date,timezone):
-    return user_mgmt.getDeviceUsageOnDay(macs,date,timezone)
+def get_device_usage_on_day_dj(request,nodeid,macs,date):
+    return getDeviceUsageOnDay(nodeid,macs,date)
 
 @jsonrpc_method('ucap.get_device_domain_on_day')
-def get_device_domain_on_day_dj(request,nodeid,topn,date,timezone):
-    return user_mgmt.getDomainUsageOnDay(nodeid,topn,date,timezone)
+def get_device_domain_on_day_dj(request,nodeid,topn,date):
+    return getDomainUsageOnDay(nodeid,topn,date)
 
 @jsonrpc_method('ucap.get_bytes_on_day')
-def get_bytes_on_day_dj(request,nodeid,date,timezone):
-    return user_mgmt.getBytesOnDay(nodeid,date,timezone)
+def get_bytes_on_day_dj(request,nodeid,date):
+    return getBytesOnDay(nodeid,date)
 
 @jsonrpc_method('ucap.get_all_bytes_on_day')
-def get_all_bytes_on_day_dj(request,date,timezone):
-    return user_mgmt.getAllBytesOnDay(date,timezone)
+def get_all_bytes_on_day_dj(request,date):
+    return getAllBytesOnDay(date)
 
 @jsonrpc_method('ucap.get_device_usage_interval')
 def get_device_usage_interval_dj(request,macs,start,end):
@@ -452,6 +453,22 @@ def set_timezone_dj(request,hid, timezone):
 @jsonrpc_method('ucap.get_timezone')
 def get_timezone_dj(request,hid):
     return getTimezone(hid)
+
+@jsonrpc_method('ucap.set_peak_hours')
+def set_peak_hours_dj(request,hid,start,end):
+    return setPeakHours(hid,start,end)
+
+@jsonrpc_method('ucap.get_peak_hours')
+def get_peak_hours_dj(request,hid):
+    return getPeakHours(hid)
+
+@jsonrpc_method('ucap.get_peak_hours_usage')
+def get_peak_hours_usage_dj(request,hid,milestone):
+    return getPeakHoursUsage(hid,milestone)
+
+@jsonrpc_method('ucap.get_shiftable_usage')
+def get_shiftable_usage_dj(request,nodeid,date):
+    return getShiftableUsage(nodeid,date)
 
 
 #######
@@ -1349,6 +1366,34 @@ def update_house_startdate(hid,startdate):
     
     return [res]
 
+def getDeviceUsageOnDay(nodeid,macs,date):
+    timezone = getTimezone(nodeid)
+    if timezone[0] == 1:
+        timezone = timezone[1][1]
+    else:
+        timezone = 0
+    return user_mgmt.getDeviceUsageOnDay(macs,date,timezone)
+
+def getDomainUsageOnDay(nodeid,topn,date):
+    timezone = getTimezone(nodeid)
+    if timezone[0] == 1:
+        timezone = timezone[1][1]
+    else:
+        timezone = 0
+    return user_mgmt.getDomainUsageOnDay(nodeid,topn,date,timezone)
+
+def getBytesOnDay(nodeid,date):
+    timezone = getTimezone(nodeid)
+    if timezone[0] == 1:
+        timezone = timezone[1][1]
+    else:
+        timezone = 0
+    return user_mgmt.getBytesOnDay(nodeid,date,timezone)
+
+def getAllBytesOnDay(date):
+    timezone = 0
+    return user_mgmt.getAllBytesOnDay(date,timezone)
+
 def getOUI(oui_addr):
     out = []
     oui = OUI(oui_addr.encode("ascii"))
@@ -1382,3 +1427,47 @@ def getTimezone(hid):
         return [1,(res[0][0], res[0][1])]
     except:
         return [0,('ERROR: No match found')]
+
+def setPeakHours(hid,start,end):
+    tab = 'userpoints'
+    digest = get_digest(hid=hid)
+    
+    arr_sdate = start.split(':')
+    arr_edate = end.split(':')
+    now = datetime.datetime.utcnow()
+    start = datetime.datetime(now.year, now.month, now.day, int(arr_sdate[0]), int(arr_sdate[1]), int(arr_sdate[2]))
+    end = datetime.datetime(now.year, now.month, now.day, int(arr_edate[0]), int(arr_edate[1]), int(arr_edate[2]))
+    #start = start.strftime("%Y-%m-%d %H:%M:%S+00")
+    #end = end.strftime("%Y-%m-%d %H:%M:%S+00")
+    
+    #PostgreSQL doesn't support MERGE nor ON DUPLICATE KEY UPDATE so we have to go the lame way :(
+    cmd1 = "update %s set peakhourstart='%s', peakhourend='%s' where digest='%s'"%(tab,start,end,digest)
+    cmd2 = "insert into %s (peakhourstart,peakhourend,digest) values ('%s','%s','%s')"%(tab,start,end,digest)
+    sql.run_insert_cmd(cmd1)
+    sql.run_insert_cmd(cmd2)
+    
+    try:
+        return [1,["SUCCESS"]]
+    except:
+        return [0,['ERROR: Could not update table']]
+
+def getPeakHours(hid):    
+    tab = 'userpoints'
+    digest = get_digest(hid=hid)
+    cmd = "select peakhourstart,peakhourend from %s where digest='%s'"%(tab,digest)
+    res = sql.run_data_cmd(cmd)
+    return res;
+
+def getPeakHoursUsage(hid,milestone):
+    peakhours = getPeakHours(hid)
+    start = peakhours[0][0]
+    end = peakhours[0][1]
+    return user_mgmt.getPeakHoursUsage(hid,milestone,start,end)
+
+def getShiftableUsage(nodeid,date):
+    timezone = getTimezone(nodeid)
+    if timezone[0] == 1:
+        timezone = timezone[1][1]
+    else:
+        timezone = 0
+    return user_mgmt.getShiftableUsage(nodeid,date,timezone)
