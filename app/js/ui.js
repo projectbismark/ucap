@@ -785,6 +785,7 @@ function Reward_rewardOverview_showUsage() {
     UCapCore.getBytesOnDay({hid:UCapCore.household[0],date:date,func:'Reward_rewardOverview_drawBandwidthUsageGraph'});
 	UCapCore.getBytesOnDay({hid:UCapCore.household[0],date:date,func:'Reward_rewardOverview_drawBandwidthUsagePercentage'});
 	UCapCore.getShiftableUsage({hid:UCapCore.household[0],date:date,func:'Reward_rewardOverview_drawShiftableUsageGraph'});
+	UCapCore.getShiftableUsage({hid:UCapCore.household[0],date:date,func:'Reward_rewardOverview_drawShiftableUsagePercentage'});
 	UCapCore.getDeviceDomainOnDay({hid:UCapCore.household[0],num:-1,date:date,func:'Reward_rewardOverview_showTopDomainList'});
     
     $('#rewardOverviewStat').slideDown('slow');
@@ -852,6 +853,38 @@ function Reward_rewardOverview_drawBandwidthUsageGraph(obj) {
 	}
 }
 
+function Reward_rewardOverview_drawBandwidthUsagePercentage(obj) {
+	var dataSet = obj.data;
+    var dataArray = [];
+	var total = 0;
+	var timezone = getTimeZone();
+	timezone = -1 * timezone;
+	
+    for (var i in dataSet) {
+		var temp = dataSet[i][0];
+		temp = temp.split(' ');
+		
+		var time = temp[1].split(':');
+		var date = new Date();
+		date.setHours(parseInt(time[0],10) + timezone);
+		var hour = "" + date.getHours();
+		if (hour.length == 1)
+			hour = "0" + hour;
+		time = hour + ":00:00";
+		
+		var usage = Math.round(parseInt(dataSet[i][1])/1048576);
+		total += usage;
+		dataArray.push([time,usage]);
+    }
+	
+	if (total > 0) {
+    	UCapViz.drawHourlyUsageChart({tar:'bytes_piechartarea',data:dataArray});
+	}
+	else {
+		$('#bytes_piechartarea').empty();	
+	}
+}
+
 function Reward_rewardOverview_drawShiftableUsageGraph(obj) {
 	var dataSet = obj.data;
     var dataArray = [];
@@ -884,7 +917,7 @@ function Reward_rewardOverview_drawShiftableUsageGraph(obj) {
 	}
 }
 
-function Reward_rewardOverview_drawBandwidthUsagePercentage(obj) {
+function Reward_rewardOverview_drawShiftableUsagePercentage(obj) {
 	var dataSet = obj.data;
     var dataArray = [];
 	var total = 0;
@@ -892,27 +925,22 @@ function Reward_rewardOverview_drawBandwidthUsagePercentage(obj) {
 	timezone = -1 * timezone;
 	
     for (var i in dataSet) {
-		var temp = dataSet[i][0];
-		temp = temp.split(' ');
+		var entry = dataSet[i];
+		var usage = 0;
+		for (var j = 0; j < entry.length; j++) {
+			usage += parseInt(entry[j][1], 10);
+		}
 		
-		var time = temp[1].split(':');
-		var date = new Date();
-		date.setHours(parseInt(time[0],10) + timezone);
-		var hour = "" + date.getHours();
-		if (hour.length == 1)
-			hour = "0" + hour;
-		time = hour + ":00:00";
-		
-		var usage = Math.round(parseInt(dataSet[i][1])/1048576);
+		usage = Math.round(usage/1048576);
 		total += usage;
-		dataArray.push([time,usage]);
+		dataArray.push([i,usage]);
     }
 	
 	if (total > 0) {
-    	UCapViz.drawHourlyUsageChart({tar:'bytes_piechartarea',data:dataArray});
+    	UCapViz.drawHourlyUsageChart({tar:'ex_shiftable_usage_piechartarea',data:dataArray});
 	}
 	else {
-		$('#bytes_piechartarea').empty();	
+		$('#ex_shiftable_usage_piechartarea').empty();	
 	}
 }
 
