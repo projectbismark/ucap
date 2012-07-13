@@ -404,7 +404,7 @@ function Network_Overview_householdUsage() {
     var cap = UCapCore.household[4];
     var usage = UCapCore.household[5];
     var template1,template2, template3;
-    if(!isNaN(cap) && !isNaN(usage) && !(cap < 0) && !(usage < 0)){
+    if(!isNaN(cap) && !isNaN(usage) && !(usage < 0)){
         //No Cap
         if(cap == -1 || cap == 0){
             template1 = "This household does not have an active bandwidth cap. <a href=\"javascript:loadModule({tar:'userContent',src:'networkManager',act:'manager',func:'Network_Manager_capManagement'});Network_clearActive();\">Would you like to set one?</a>";
