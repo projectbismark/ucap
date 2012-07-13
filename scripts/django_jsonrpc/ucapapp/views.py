@@ -65,8 +65,9 @@ def user_logout(request):
 
 @jsonrpc_method('ucap.user_login')
 def user_login(request,ent_username,ent_password):
-    user = authenticate(username=ent_username,password=ent_password)
-    hid = getHouseInfo(getHouseDigestFromUserID(ent_username))
+    lower_username = ent_username.lower();
+    user = authenticate(username=lower_username,password=ent_password)
+    hid = getHouseInfo(getHouseDigestFromUserID(lower_username))
     hid = hid[1]
     res = []
 
@@ -551,7 +552,7 @@ def addUser_new(hid,uid,name,details,email,passwd,role,notify,notifyperc,notifie
     return [res]
 
 def changePasswd(email,passwd,new_passwd):
-    user = authenticate(username=email,password=passwd)
+    user = authenticate(username=(email.lower()),password=passwd)
     res = []
     if user is not None:
         user.set_password(new_passwd)
