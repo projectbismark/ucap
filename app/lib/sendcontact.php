@@ -4,8 +4,6 @@ require_once ("Mail.php");
 
 if ($_SERVER["REQUEST_METHOD"] == "POST")
 {
-	$to = "projectucap@googlegroups.com";
-	
 	$issue = $_POST["issue"];
 	$name = $_POST["name"];
 	$email = $_POST["email"];

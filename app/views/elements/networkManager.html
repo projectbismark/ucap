@@ -1,7 +1,7 @@
 <form id="netInfo">
     <ul>
         <li><h6>Monthly Household Cap</h6></li>
-        <li class="leftPadding">Total Monthy Bandwidth Cap: <input name="household-cap" type="text" class="inline smallField" onchange="Network_Manager_saveNetworkInfo()"/>&nbsp;GB</li>
+        <li class="leftPadding">Total Monthy Bandwidth Cap: <input name="household-cap" type="text" class="inline smallField" onkeypress="return numericOnly(event)" onchange="Network_Manager_saveNetworkInfo()"/>&nbsp;GB</li>
         <li class="leftPadding">The Next Billing Cycle Ends On:
             <span class="dateInputSet"><input type="text" id="startday" value="" name="start-day" class="datepicker" onchange="Network_Manager_saveStartDate()" readonly="readonly"/></span>
         <li><h6>Monthly Device Caps</h6></li>

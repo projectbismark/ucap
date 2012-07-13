@@ -28,7 +28,7 @@ REMOTE_JSON = 'https://localhost/json/json/'
 LOCAL_SMTP_PORT = 25
 
 # email related
-EMAIL_SENDER = 'ucap-admin@mail.noise.gatech.edu'
+EMAIL_SENDER = 'ucap@projectbismark.net'
 EMAIL_RECEIVER = ''
 EMAIL_SUBJECT = '[uCap] Cap reached notification'
 EMAIL_BASE_CONTENT = 'This is an automated message from uCap. Do not reply to this address.\n\n'
