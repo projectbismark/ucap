@@ -30,11 +30,21 @@ LOCAL_DB_PORT = 54322
 HASHED_GW_POS = 2
 MAC_START_POS = 5
 
-###
-def get_config(key):
+## Deployment and test database
+DEPLOY = 1
+TEST = 2
+
+
+
+####
+def get_config(db_type, key):
     config = ''
+
     try: 
-        config = open('server.conf').readlines()
+        if db_type == DEPLOY:
+            config = open('server.conf').readlines()
+        else:
+            config = open('server_test.conf').readlines()
     except IOError as (errno, strerror):
         print "I/O error({0}): {1}".format(errno, strerror)
 
@@ -126,11 +136,12 @@ def process_file(filename, cursor, hid_str):
                             print 'New Device Added'
                         if not digest_str=='':
                             cmd = "UPDATE device_caps_curr set usage=%s where digest='%s'" %(usage_str,digest_str)
-    #                        print cmd
                             cursor.execute(cmd)
                             print 'Usage Updated'
                     except:
                         print 'Failed in database command sequence.'
+                        time.sleep(5)
+                        return -1
 
         # Move file when done with processing
         tmp_lst = (os.path.dirname(filename)).split('/')
@@ -166,25 +177,37 @@ def process_existing(conn, cursor):
                     tmp_lst = hid_str.split('-')
                     hid_str = tmp_lst[0]
 
-                    process_file(CHECK_DIR+'/'+dirc+'/'+files, cursor, hid_str)
-                    conn.commit()
+                    r_check = process_file(CHECK_DIR+'/'+dirc+'/'+files, cursor, hid_str)
+                    if r_check != -1:
+                        conn.commit()
+                    else:
+                        break
 
 ### main ###
 def main():
 
-    check_glb = 6
-    # Connection establishment to DB
-    sql_host = get_config('sql_host').strip()
-    sql_user = get_config('sql_user').strip()
-    sql_passwd = get_config('sql_passwd').strip()
-    sql_db = get_config('sql_db').strip()
-
-    print sql_host,sql_user,sql_passwd,sql_db
-    try:
-        conn = psycopg2.connect(database=sql_db, host=sql_host, user=sql_user, password=sql_passwd, port=LOCAL_DB_PORT)
-    except:
-        print 'Unable to connect to database. Abort.'
-        sys.exit()
+    while (1):
+        # Connection establishment to DB
+        sql_host = get_config(DEPLOY, 'sql_host').strip()
+        sql_user = get_config(DEPLOY, 'sql_user').strip()
+        sql_passwd = get_config(DEPLOY, 'sql_passwd').strip()
+        sql_db = get_config(DEPLOY, 'sql_db').strip()
+    
+    #    sql_host_test = get_config(TEST, 'sql_host').strip()
+    #    sql_user_test = get_config(TEST, 'sql_user').strip()
+    #    sql_passwd_test = get_config(TEST, 'sql_passwd').strip()
+    #    sql_db_test = get_config(TEST, 'sql_db').strip()
+    
+    
+        try:
+            conn = psycopg2.connect(database=sql_db, host=sql_host, user=sql_user, password=sql_passwd, port=LOCAL_DB_PORT)
+            print 'CONNECTED!!'
+            break
+        except:
+            print 'Unable to connect to database. Continue trying..'
+            time.sleep(5)
+#            sys.exit()
+            continue
         
     cursor = conn.cursor()
 
@@ -206,21 +229,19 @@ def main():
             hid_str = hid_time_seq[-1]
             tmp_lst = hid_str.split('-')
             hid_str = tmp_lst[0]
-#            seq_num = int(tmp_lst[2])
-
-#            if (seq_num%5)==0:
-#                process_existing(conn,cursor)
 
             # if new directory, make it on moved_dir, and pass.
             if os.path.isdir(event.pathname):
                tmp_lst = (event.pathname).split('/')
-               os.mkdir(MOVE_DIR+'/'+tmp_lst[-1])
+               if os.path.exists(MOVE_DIR+'/'+tmp_lst[-1])==False:
+                 os.mkdir(MOVE_DIR+'/'+tmp_lst[-1])
 
             # if regular file, process it.
             else:
-                count_check = process_file(event.pathname, cursor, hid_str)
+                count_check = process_file(event.pathname, cursor,  hid_str)
                 conn.commit()
-            
+
+            print "Start processing existing stuff again"
             process_existing(conn,cursor)
 
     handler = EventHandler()
