@@ -41,7 +41,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 	}
 	
 	/* Create header files */
-	$message = $name . " wrote,\n\n" . $message . "\n\nSent from uCap Contact Us Page";
+	$body = "Name: " . $name . "\n";
+	$body .= "Email: " . $email . "\n";
+	$body .= "Issue: " . $issue . "\n";
+	
+	$body .= "\n";
+	$body .= $message . "\n\n";
+	$body .= "Sent from uCap Contact Us Page";
 	
 	/* Send email */
 	//$ret = mail ($to, $subject, $message, $headers);
@@ -51,7 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 								 'auth' => true,
 								 'username' => $username,
 								 'password' => $password));
-	$mail = $smtp->send($to, $headers, $message);
+	$mail = $smtp->send($to, $headers, $body);
 	
 	if (PEAR::isError($mail))
 	{
