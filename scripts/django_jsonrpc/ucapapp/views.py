@@ -431,6 +431,10 @@ def get_device_domain_on_day_dj(request,nodeid,topn,date):
 def get_bytes_on_day_dj(request,nodeid,date):
     return getBytesOnDay(nodeid,date)
 
+@jsonrpc_method('ucap.get_bytes_on_day_non_anonymized')
+def get_bytes_on_day_non_anonymized_dj(request,nodeid,date):
+    return getBytesOnDayNonAnonymized(nodeid,date)
+
 @jsonrpc_method('ucap.get_all_bytes_on_day')
 def get_all_bytes_on_day_dj(request,date):
     return getAllBytesOnDay(date)
@@ -1390,6 +1394,14 @@ def getBytesOnDay(nodeid,date):
     else:
         timezone = 0
     return user_mgmt.getBytesOnDay(nodeid,date,timezone)
+
+def getBytesOnDayNonAnonymized(nodeid,date):
+    timezone = getTimezone(nodeid)
+    if timezone[0] == 1:
+        timezone = timezone[1][1]
+    else:
+        timezone = 0
+    return user_mgmt.getBytesOnDayNonAnonymized(nodeid,date,timezone)
 
 def getAllBytesOnDay(date):
     timezone = 0

@@ -399,6 +399,32 @@ def getDomainUsageOnDay(nodeid,topn,date,timezone):
 
     return out
 
+def getAnonymizedDomainUsageOnDay(nodeid,date,timezone):    
+    arr_date = date.split('-')
+    sdate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), 0, 0, 0)
+    edate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), 23, 59, 59)
+    delta = datetime.timedelta(hours=timezone)
+
+    sdate = sdate - delta
+    edate = edate - delta
+    start = sdate.strftime("%Y-%m-%d %H:%M:%S+00")
+    end = edate.strftime("%Y-%m-%d %H:%M:%S+00")
+
+    cmd = "select t.timestamp as d, t.domain, t.bytes as s from bismark_passive.bytes_per_domain_per_hour as t where t.node_id='%s' and t.timestamp between '%s' and '%s' and domain is null order by d asc,s desc"%(nodeid,start,end)
+    res = sql.run_data_cmd(cmd)
+
+    out = {}
+    # Deal with data from database first
+    for rec in res:
+        date = rec[0][0:len(rec[0]) - 3]
+        try:
+            out[date].append((rec[1],rec[2]))
+        except:
+            out[date] = []
+            out[date].append((rec[1],rec[2]))
+
+    return out
+
 def getBytesOnDay(nodeid,date,timezone):
     arr_date = date.split('-')
     sdate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), 0, 0, 0)
@@ -440,6 +466,23 @@ def getBytesOnDay(nodeid,date,timezone):
     out = sorted(out, key=lambda dates: dates[0])
     
     return out
+
+def getBytesOnDayNonAnonymized(nodeid,date,timezone):
+	bytes_on_day = getBytesOnDay(nodeid,date,timezone)
+	anonymized_domain_on_day = getAnonymizedDomainUsageOnDay(nodeid,date,timezone)
+	
+	out = []
+	for rec in bytes_on_day:
+		date = rec[0]
+		byte = rec[1]
+		other = 0
+		try:
+			other = anonymized_domain_on_day[date][0][1]
+		except:
+			other = 0
+		out.append((date,byte - other))
+			
+	return out
 
 def getAllBytesOnDay(date,timezone):
     # Get all node_id
