@@ -334,8 +334,8 @@ def getDeviceUsageOnDay(macs,date,timezone):
     edate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), 23, 59, 59)
     delta = datetime.timedelta(hours=timezone)
     
-    sdate = sdate + delta
-    edate = edate + delta
+    sdate = sdate - delta
+    edate = edate - delta
     start = sdate.strftime("%Y-%m-%d %H:%M:%S+00")
     end = edate.strftime("%Y-%m-%d %H:%M:%S+00")
     
@@ -378,8 +378,8 @@ def getDomainUsageOnDay(nodeid,topn,date,timezone):
     edate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), 23, 59, 59)
     delta = datetime.timedelta(hours=timezone)
     
-    sdate = sdate + delta
-    edate = edate + delta
+    sdate = sdate - delta
+    edate = edate - delta
     start = sdate.strftime("%Y-%m-%d %H:%M:%S+00")
     end = edate.strftime("%Y-%m-%d %H:%M:%S+00")
     
@@ -405,8 +405,8 @@ def getBytesOnDay(nodeid,date,timezone):
     edate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), 23, 59, 59)
     delta = datetime.timedelta(hours=timezone)
     
-    sdate = sdate + delta
-    edate = edate + delta
+    sdate = sdate - delta
+    edate = edate - delta
     start = sdate.strftime("%Y-%m-%d %H:%M:%S+00")
     end = edate.strftime("%Y-%m-%d %H:%M:%S+00")
     
@@ -460,66 +460,90 @@ def getAllBytesOnDay(date,timezone):
 
     return out
 
-def getDeviceUsageInterval(macs,start,end):
-  gmacs = get_group(macs,"'")
-  cmd = "select devices.name, date(t.timestamp) as d, sum(t.bytes) from bismark_passive.bytes_per_device_per_hour as t,devices where t.mac_address in %s and devices.macid[1]=t.mac_address and t.timestamp between '%s' and '%s' group by devices.name,t.mac_address,d order by t.mac_address,d asc"%(gmacs,start,end)
-#  cmd = "select t.mac_address, date(t.timestamp) as d, sum(t.bytes) from bismark_passive.bytes_per_device_per_hour as t where t.mac_address in %s and t.timestamp between '%s' and '%s' group by t.mac_address,d order by t.mac_address,d asc"%(gmacs,start,end)
-  res = sql.run_data_cmd(cmd)
-  out = {}
-  thedate = ''
-  value = 0
-  ss = start.split('-')
-  es = end.split('-')
-  sd = datetime.date(int(ss[0]),int(ss[1]),int(ss[2]))
-  ed = datetime.date(int(es[0]),int(es[1]),int(es[2]))
-
-  # Deal with data from database first
-  for rec in res:
-    try:
-      out[rec[0]].append((rec[1],rec[2]))
-    except:
-      out[rec[0]] = []
-      out[rec[0]].append((rec[1],rec[2]))
-
-  # Fill in 0s for missing dates (where usage is actually 0).
-  for dev in out:
-    for n in range((ed-sd).days+1):
-      found = False
-      curr_date_d = sd+datetime.timedelta(n)
-      curr_date = (curr_date_d).timetuple()
-      for entry in out[dev]:
-        entry_date = time.strptime(entry[0],'%Y-%m-%d')
-        if curr_date == entry_date:
-          found = True
-          break
-      if found is False:
-        out[dev].append((str(curr_date_d),0))
-    out[dev] = sorted(out[dev], key=lambda dates: dates[0])
-  return out
-  
-def getDomainUsageInterval(nodeid,topn,start,end):
-  cmd = "select t.domain, sum(t.bytes) as s from bismark_passive.bytes_per_domain_per_hour as t where node_id = '%s' and t.timestamp between '%s' and '%s' group by t.domain order by s desc"%(nodeid,start,end)
-  res = sql.run_data_cmd(cmd)
-  doms = []
-  tot = 0
-  for rec in res:
-    tot += int(rec[1])
-    if rec[0] is not None:
-      doms.append((rec[0],rec[1]))
-  tdoms = doms[:topn]
-#  print tot
-  out = {"other":[]}
-  otot = 0
-  for domd in tdoms:
-    try:
-      out[domd[0]].append((domd[1],float(domd[1])/tot))
-      otot += domd[1]
-    except:
-      out[domd[0]] = []
-      out[domd[0]].append((domd[1],float(domd[1])/tot))
-      otot += domd[1]
-  out["other"].append((tot-otot,(tot-otot)/tot)) 
-  return out 
+def getDeviceUsageInterval(macs,start,end,timezone):
+	delta = datetime.timedelta(hours=timezone)
+	arr_sdate = start.split('-')
+	sdate = datetime.datetime(int(arr_sdate[0]), int(arr_sdate[1]), int(arr_sdate[2]), 0, 0, 0)
+	sdate = sdate - delta
+	start = sdate.strftime("%Y-%m-%d %H:%M:%S+00")
+	
+	arr_edate = end.split('-')
+	edate = datetime.datetime(int(arr_edate[0]), int(arr_edate[1]), int(arr_edate[2]), 0, 0, 0)
+	edate = edate - delta
+	end = edate.strftime("%Y-%m-%d %H:%M:%S+00")
+	
+	gmacs = get_group(macs,"'")
+	cmd = "select devices.name, date(t.timestamp) as d, sum(t.bytes) from bismark_passive.bytes_per_device_per_hour as t,devices where t.mac_address in %s and devices.macid[1]=t.mac_address and t.timestamp between '%s' and '%s' group by devices.name,t.mac_address,d order by t.mac_address,d asc"%(gmacs,start,end)
+	#  cmd = "select t.mac_address, date(t.timestamp) as d, sum(t.bytes) from bismark_passive.bytes_per_device_per_hour as t where t.mac_address in %s and t.timestamp between '%s' and '%s' group by t.mac_address,d order by t.mac_address,d asc"%(gmacs,start,end)
+	res = sql.run_data_cmd(cmd)
+	out = {}
+	thedate = ''
+	value = 0
+	sd = datetime.datetime(int(arr_sdate[0]), int(arr_sdate[1]), int(arr_sdate[2]))
+	ed = datetime.datetime(int(arr_edate[0]), int(arr_edate[1]), int(arr_edate[2]))
+	
+	# Deal with data from database first
+	for rec in res:
+		try:
+			out[rec[0]].append((rec[1],rec[2]))
+		except:
+			out[rec[0]] = []
+			out[rec[0]].append((rec[1],rec[2]))
+	
+	# Fill in 0s for missing dates (where usage is actually 0).
+	for dev in out:
+		for n in range((ed-sd).days+1):
+			found = False
+			curr_date_d = sd+datetime.timedelta(n)
+			curr_date = (curr_date_d).timetuple()
+			for entry in out[dev]:
+				entry_date = time.strptime(entry[0],'%Y-%m-%d')
+				if curr_date == entry_date:
+					found = True
+					break
+			if found is False:
+				scurr_date_d = curr_date_d.strftime("%Y-%m-%d")
+				out[dev].append((scurr_date_d,0))
+		out[dev] = sorted(out[dev], key=lambda dates: dates[0])
+	
+	return out
+	
+def getDomainUsageInterval(nodeid,topn,start,end,timezone):
+	delta = datetime.timedelta(hours=timezone)
+	arr_sdate = start.split('-')
+	sdate = datetime.datetime(int(arr_sdate[0]), int(arr_sdate[1]), int(arr_sdate[2]), 0, 0, 0)
+	sdate = sdate - delta
+	start = sdate.strftime("%Y-%m-%d %H:%M:%S+00")
+	
+	arr_edate = end.split('-')
+	edate = datetime.datetime(int(arr_edate[0]), int(arr_edate[1]), int(arr_edate[2]), 0, 0, 0)
+	edate = edate - delta
+	end = edate.strftime("%Y-%m-%d %H:%M:%S+00")
+	
+	cmd = "select t.domain, sum(t.bytes) as s from bismark_passive.bytes_per_domain_per_hour as t where node_id = '%s' and t.timestamp between '%s' and '%s' group by t.domain order by s desc"%(nodeid,start,end)
+	res = sql.run_data_cmd(cmd)
+	doms = []
+	tot = 0
+	for rec in res:
+		tot += int(rec[1])
+		if rec[0] is not None:
+			doms.append((rec[0],rec[1]))
+	tdoms = doms[:topn]
+	
+	#  print tot
+	out = {"other":[]}
+	otot = 0
+	for domd in tdoms:
+		try:
+			out[domd[0]].append((domd[1],float(domd[1])/tot))
+			otot += domd[1]
+		except:
+			out[domd[0]] = []
+			out[domd[0]].append((domd[1],float(domd[1])/tot))
+			otot += domd[1]
+	out["other"].append((tot-otot,(tot-otot)/tot)) 
+	
+	return out 
 
 def getPeakHoursUsage(hid,milestone,start,end):
     return 100
@@ -539,7 +563,7 @@ def getShiftableUsage(nodeid,date,timezone):
     arr_date = date.split('-')
     idate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), 0, 0, 0)
     delta = datetime.timedelta(hours=timezone)
-    idate = idate + delta
+    idate = idate - delta
     one_hour = datetime.timedelta(hours=1)
     for x in xrange(24):
         sdate = idate.strftime("%Y-%m-%d %H:%M:%S")

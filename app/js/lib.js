@@ -54,3 +54,13 @@ function getTimeZone()
 	
 	return timezone;
 }
+
+/**
+ * Spinwaiting -- use it wisely
+ * @param milliseconds The duration of spinwaiting
+ */
+function spinWait(milliseconds)
+{
+	milliseconds += new Date().getTime();
+	while (new Date() < milliseconds){}
+}

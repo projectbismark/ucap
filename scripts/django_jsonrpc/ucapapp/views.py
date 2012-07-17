@@ -436,12 +436,12 @@ def get_all_bytes_on_day_dj(request,date):
     return getAllBytesOnDay(date)
 
 @jsonrpc_method('ucap.get_device_usage_interval')
-def get_device_usage_interval_dj(request,macs,start,end):
-    return user_mgmt.getDeviceUsageInterval(macs,start,end)
+def get_device_usage_interval_dj(request,nodeid,macs,start,end):
+    return getDeviceUsageInterval(nodeid,macs,start,end)
 
 @jsonrpc_method('ucap.get_device_domain_interval')
 def get_device_domain_interval_dj(request,nodeid,topn,start,end):
-    return user_mgmt.getDomainUsageInterval(nodeid,topn,start,end)
+    return getDomainUsageInterval(nodeid,topn,start,end)
 
 @jsonrpc_method('ucap.get_oui')
 def get_oui_dj(request,oui_addr):
@@ -1394,6 +1394,22 @@ def getBytesOnDay(nodeid,date):
 def getAllBytesOnDay(date):
     timezone = 0
     return user_mgmt.getAllBytesOnDay(date,timezone)
+
+def getDeviceUsageInterval(nodeid,macs,start,end):
+    timezone = getTimezone(nodeid)
+    if timezone[0] == 1:
+        timezone = timezone[1][1]
+    else:
+        timezone = 0
+    return user_mgmt.getDeviceUsageInterval(macs,start,end,timezone)
+
+def getDomainUsageInterval(nodeid,topn,start,end):
+    timezone = getTimezone(nodeid)
+    if timezone[0] == 1:
+        timezone = timezone[1][1]
+    else:
+        timezone = 0
+    return user_mgmt.getDomainUsageInterval(nodeid,topn,start,end,timezone)
 
 def getOUI(oui_addr):
     out = []

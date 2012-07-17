@@ -371,7 +371,7 @@ var UCapCore = {
     },
 
     getDeviceUsageHistory:function(obj){
-        $.jsonRPC.request('ucap.get_device_usage_interval', {params:[obj.devices,obj.start,obj.end],
+        $.jsonRPC.request('ucap.get_device_usage_interval', {params:[obj.hid,obj.devices,obj.start,obj.end],
             success:function (data) {
                 var result = data["result"];
                 if(obj.func)
@@ -381,7 +381,7 @@ var UCapCore = {
                 UCapManager.notification("error", "Error: getDeviceUsageHistory");
             }
         });
-        UCapCore.logAction({fname:'get_device_usage_interval', params:obj.devices + ',' + obj.start + ',' + obj.end});
+        UCapCore.logAction({fname:'get_device_usage_interval', params:obj.hid + ',' + obj.devices + ',' + obj.start + ',' + obj.end});
     },
 
     getHouseHoldDomainHistory:function(obj){
