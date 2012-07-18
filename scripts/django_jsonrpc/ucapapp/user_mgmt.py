@@ -591,37 +591,80 @@ def getDomainUsageInterval(nodeid,topn,start,end,timezone):
 def getPeakHoursUsage(hid,milestone,start,end):
     return 100
 
+def getShiftableDomain():
+	shiftable = ['akamai.net',
+				 'amazonaws.com',
+				 'llnwd.net']
+	return shiftable
+	
 def getShiftableUsage(nodeid,date,timezone):
     #Shiftable domains
-    shiftable = ['akamai.net',
-                 'amazonaws.com',
-                 'llnwd.net']
+	shiftable = getShiftableDomain();
+	res = getDomainUsageOnDay(nodeid,-1,date,timezone)
     
-    res = getDomainUsageOnDay(nodeid,-1,date,timezone)
+	out = {}
+	out['shiftable'] = []
+	out['nonshiftable'] = []
     
-    out = {}
-    out['shiftable'] = []
-    out['nonshiftable'] = []
-    
-    arr_date = date.split('-')
-    idate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), 0, 0, 0)
-    delta = datetime.timedelta(hours=timezone)
-    idate = idate - delta
-    one_hour = datetime.timedelta(hours=1)
-    for x in xrange(24):
-        sdate = idate.strftime("%Y-%m-%d %H:%M:%S")
-        rec = res[sdate]
+	arr_date = date.split('-')
+	idate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), 0, 0, 0)
+	delta = datetime.timedelta(hours=timezone)
+	idate = idate - delta
+	one_hour = datetime.timedelta(hours=1)
+	for x in xrange(24):
+		sdate = idate.strftime("%Y-%m-%d %H:%M:%S")
+		rec = res.get(sdate)
         
-        shiftable_usage = 0
-        non_shiftable_usage = 0
-        for entry in rec:
-            domain = entry[0]
-            if domain in shiftable:
-                shiftable_usage += entry[1]
-            else:
-                non_shiftable_usage += entry[1]
+		shiftable_usage = 0
+		non_shiftable_usage = 0
+		if rec != None:
+			for entry in rec:
+				domain = entry[0]
+				if domain in shiftable:
+					shiftable_usage += entry[1]
+				else:
+					non_shiftable_usage += entry[1]
 
-        out['shiftable'].append([sdate, shiftable_usage])
-        out['nonshiftable'].append([sdate, non_shiftable_usage])
-        idate = idate + one_hour
-    return out
+		out['shiftable'].append([sdate, shiftable_usage])
+		out['nonshiftable'].append([sdate, non_shiftable_usage])
+		idate = idate + one_hour
+	return out
+
+def getShiftableUsageComparison(nodeid,date,timezone):
+	# x-axis is local time
+	# y-axis is traffic volume
+	# each plot has two lines, with one point per hour:
+	# 	total whitelisted traffic (Label: "All Traffic")
+	#	total whitelisted shiftable traffic (Label: "Shiftable Traffic")
+	
+    #Shiftable domains
+	shiftable = getShiftableDomain();
+	domain_usage = getDomainUsageOnDay(nodeid,-1,date,timezone)
+    
+	out = {}
+	out['All traffic'] = []
+	out['Shiftable Traffic'] = []
+    
+	arr_date = date.split('-')
+	idate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), 0, 0, 0)
+	delta = datetime.timedelta(hours=timezone)
+	idate = idate - delta
+	one_hour = datetime.timedelta(hours=1)
+	for x in xrange(24):
+		sdate = idate.strftime("%Y-%m-%d %H:%M:%S")
+		rec = domain_usage.get(sdate)
+        
+		all_traffic = 0
+		shiftable_traffic = 0
+		if rec != None:
+			for entry in rec:
+				domain = entry[0]
+				if domain != None:					
+					if domain in shiftable:
+						shiftable_traffic += entry[1]
+					all_traffic += entry[1]
+
+		out['All traffic'].append([sdate, all_traffic])
+		out['Shiftable Traffic'].append([sdate, shiftable_traffic])
+		idate = idate + one_hour
+	return out	

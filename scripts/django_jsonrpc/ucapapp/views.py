@@ -431,7 +431,7 @@ def get_device_domain_on_day_dj(request,nodeid,topn,date):
 def get_bytes_on_day_dj(request,nodeid,date):
     return getBytesOnDay(nodeid,date)
 
-@jsonrpc_method('ucap.get_bytes_on_day_non_anonymized')
+@jsonrpc_method('ucap.get_whitelisted_bytes_on_day')
 def get_bytes_on_day_non_anonymized_dj(request,nodeid,date):
     return getBytesOnDayNonAnonymized(nodeid,date)
 
@@ -474,6 +474,10 @@ def get_peak_hours_usage_dj(request,hid,milestone):
 @jsonrpc_method('ucap.get_shiftable_usage')
 def get_shiftable_usage_dj(request,nodeid,date):
     return getShiftableUsage(nodeid,date)
+
+@jsonrpc_method('ucap.get_all_vs_shiftable_usage')
+def get_shiftable_usage_comparison_dj(request,nodeid,date):
+    return getShiftableUsageComparison(nodeid,date)
 
 
 #######
@@ -1500,3 +1504,11 @@ def getShiftableUsage(nodeid,date):
     else:
         timezone = 0
     return user_mgmt.getShiftableUsage(nodeid,date,timezone)
+
+def getShiftableUsageComparison(nodeid,date):
+    timezone = getTimezone(nodeid)
+    if timezone[0] == 1:
+        timezone = timezone[1][1]
+    else:
+        timezone = 0
+    return user_mgmt.getShiftableUsageComparison(nodeid,date,timezone)
