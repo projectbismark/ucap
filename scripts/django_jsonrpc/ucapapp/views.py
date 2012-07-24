@@ -1489,13 +1489,20 @@ def getPeakHours(hid):
     digest = get_digest(hid=hid)
     cmd = "select peakhourstart,peakhourend from %s where digest='%s'"%(tab,digest)
     res = sql.run_data_cmd(cmd)
-    return res;
+    return res
 
 def getPeakHoursUsage(hid,milestone):
-    peakhours = getPeakHours(hid)
-    start = peakhours[0][0]
-    end = peakhours[0][1]
-    return user_mgmt.getPeakHoursUsage(hid,milestone,start,end)
+	peakhours = getPeakHours(hid)
+	start = peakhours[0][0]
+	end = peakhours[0][1]
+
+	timezone = getTimezone(hid)
+	if timezone[0] == 1:
+		timezone = timezone[1][1]
+	else:
+		timezone = 0
+
+	return user_mgmt.getPeakHoursUsage(hid,milestone,start,end,timezone)
 
 def getShiftableUsage(nodeid,date):
     timezone = getTimezone(nodeid)

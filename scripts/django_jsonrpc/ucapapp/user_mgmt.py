@@ -5,6 +5,7 @@ import pgsql as sql
 from gen import *
 import time
 import datetime
+from dateutil.relativedelta import relativedelta
 
 def addHouse(hid,address,details,photofilepath=''):
     unittype = 'household'
@@ -588,8 +589,67 @@ def getDomainUsageInterval(nodeid,topn,start,end,timezone):
 	
 	return out 
 
-def getPeakHoursUsage(hid,milestone,start,end):
-    return 100
+def getStartBillingDate(hid):
+	digest = get_digest(hid=hid)
+	cmd = "select startdt from household_caps_curr where digest='%s'"%(digest)
+	res = sql.run_data_cmd(cmd)
+	return res
+
+def getBytesBetween(hid,start,end,timezone):
+	# start and end should be in datetime format
+	delta = datetime.timedelta(hours=timezone)
+	start = start - delta
+	start = start.strftime("%Y-%m-%d %H:%M:%S+00")
+	
+	end = end - delta
+	end = end.strftime("%Y-%m-%d %H:%M:%S+00")
+	
+	cmd = "select t.timestamp as d, t.bytes as s from bismark_passive.bytes_per_hour as t where t.node_id='%s' and t.timestamp between '%s' and '%s' order by d asc"%(hid,start,end)
+	res = sql.run_data_cmd(cmd)
+	
+	return res
+
+def getPeakHoursUsage(hid,milestone,start,end,timezone):
+	# Definition:
+	# The length of a milestone is one month. It is a multiple of billing period.
+	
+	startBillingDate = getStartBillingDate(hid)
+	arr_sbd = startBillingDate[0][0].split(' ')
+	arr_sbd = arr_sbd[0].split('-')
+	
+	smilestone = relativedelta(months=milestone)
+	emilestone = relativedelta(months=(milestone - 1))
+	
+	arr_stemp = start.split(' ')
+	arr_stime = arr_stemp[1].split(':')
+	sdate = datetime.datetime(int(arr_sbd[0]), int(arr_sbd[1]), int(arr_sbd[2]), int(arr_stime[0]), int(arr_stime[1]), int(arr_stime[2]))
+	sdate = sdate - smilestone
+	#start = sdate.strftime("%Y-%m-%d %H:%M:%S+00")
+	
+	arr_etemp = end.split(' ')
+	arr_etime = arr_etemp[1].split(':')
+	edate = datetime.datetime(int(arr_sbd[0]), int(arr_sbd[1]), int(arr_sbd[2]), int(arr_etime[0]), int(arr_etime[1]), int(arr_etime[2]))
+	edate = edate - emilestone
+	#end = edate.strftime("%Y-%m-%d %H:%M:%S+00")
+	
+	totalUsage = 0
+	one_day = datetime.timedelta(days=1)
+	idate = sdate
+	idelta = edate - idate
+	while idelta.days > 0:
+		iedate = datetime.datetime(idate.year, idate.month, idate.day, edate.hour, edate.minute, edate.second)
+		usage = getBytesBetween(hid,idate,iedate,timezone)
+		for idx in range(len(usage)):
+			if idx == 0:
+				# the byte usage is one hour offset-ed
+				continue
+			else:
+				totalUsage += usage[idx][1]
+		
+		idate = idate + one_day
+		idelta = edate - idate
+		
+	return totalUsage
 
 def getShiftableDomain():
 	shiftable = ['akamai.net',
@@ -642,7 +702,7 @@ def getShiftableUsageComparison(nodeid,date,timezone):
 	domain_usage = getDomainUsageOnDay(nodeid,-1,date,timezone)
     
 	out = {}
-	out['All traffic'] = []
+	out['All Traffic'] = []
 	out['Shiftable Traffic'] = []
     
 	arr_date = date.split('-')
@@ -664,7 +724,7 @@ def getShiftableUsageComparison(nodeid,date,timezone):
 						shiftable_traffic += entry[1]
 					all_traffic += entry[1]
 
-		out['All traffic'].append([sdate, all_traffic])
+		out['All Traffic'].append([sdate, all_traffic])
 		out['Shiftable Traffic'].append([sdate, shiftable_traffic])
 		idate = idate + one_hour
 	return out	
