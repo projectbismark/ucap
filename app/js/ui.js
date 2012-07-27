@@ -60,8 +60,9 @@ function Settings_formatAvatarModal() {
                     'musician_female_light','musician_male_dark','musician_male_light','person_coffeebreak_female_dark','person_coffeebreak_female_light',
                     'person_coffeebreak_male_dark','person_coffeebreak_male_light','person_undefined_female_dark','person_undefined_female_light','person_undefined_male_dark','person_undefined_male_light','pilotoldfashioned_female_dark',
                     'pilotoldfashioned_female_light','pilotoldfashioned_male_dark','pilotoldfashioned_male_light','viking_female','viking_male'];
-    $.each(avatars,function(index,value){
-        var template = '<li><a href="javascript:Settings_saveAvatar({photoid:\''+value+'\'});"><img class="profilePic" src="images/user_avatars/'+ value +'.jpg" /></a></li>';
+	
+	$.each(avatars,function(index,value){
+        template = '<li><a href="javascript:Settings_saveAvatar({photoid:\''+value+'\'});"><img class="profilePic" src="images/user_avatars/'+ value +'.jpg" /></a></li>';
         $('#avatarList').append(template);
     });
 }
@@ -103,6 +104,25 @@ function Settings_saveTimeZoneInfo() {
 }
 
 function Settings_setTimeZoneInfo(obj) {
+	//checkForRouter(Settings_setTimeZoneSuccess, Settings_setTimeZoneError)
+}
+
+function Settings_setTimeZoneSuccess(obj) {
+	var timezone = obj["data"][1][1];
+	var ctimezoze = getTimeZone() * -1;
+	if (timezone != null)
+	{
+		if (timezone != ctimezone)
+		{
+			$('select[name="household-time-zone"]').val(ctimezone);
+			Settings_saveTimeZoneInfo();
+		}
+	}
+	else
+		$('select[name="household-time-zone"]').val(0);
+}
+
+function Settings_setTimeZoneError(jqXHR, textStatus, errorThrown) {
 	var timezone = obj["data"][1][1];
 	if (timezone != null)
 		$('select[name="household-time-zone"]').val(timezone);

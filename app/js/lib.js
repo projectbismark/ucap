@@ -64,3 +64,49 @@ function spinWait(milliseconds)
 	milliseconds += new Date().getTime();
 	while (new Date() < milliseconds){}
 }
+
+/**
+ * Check if the client is in the same network as the BISmark
+ * router.
+ * @param success The callback for when the client is in the
+ *				  same network as the BISmark router.
+ *				  Prototype: function(data)
+ * @param error The callback for when the client is NOT in the
+ * 				same network as the BISmark router
+ *				Prototype: function(jqXHR, textStatus, errorThrown)
+ */
+function checkForRouter(success, error)
+{
+	var hosts = ['myrouter.projectbismark.net',
+                 'myrouter.local',
+                 '192.168.142.1'];
+	
+	for (var idx in hosts) 
+	{
+        var theurl = ("http://" + hosts[idx] + "/cgi-bin/projectbismark-verify");
+		$.ajax({
+        	type: "GET",
+			url: theurl,
+			timeout: 3000,
+			crossDomain: true,
+			error: error,
+			success: function (data) {
+				var router_ip = $.trim(data);
+				if (router_ip.match(/^(\d+\.){3}\d+$/) != null ) 
+				{
+					$.ajax({
+						type: 'GET',
+						url: ("http://" + router_ip + "/cgi-bin/projectbismark-verify"),
+						crossDomain: true,
+						error: error,
+						success: success
+					});
+				} 
+				else 
+				{
+					error(null, "Invalid IP address", "Invalid IP address");
+				}
+			}
+		});
+    }
+}
