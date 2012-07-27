@@ -122,9 +122,11 @@ CREATE TABLE function_call_log (
 CREATE VIEW view_mapped AS SELECT d.id as devid, dc.capped as dcapped, dc.cap dcap, dc.usage as dusage, u.id as uid, uc.capped as ucapped,uc.cap as ucap,uc.usage as uusage, h.id as hid, hc.capped as hcapped,hc.cap as hcap,hc.usage as husage from device_caps_curr as dc, devices as d, users as u, user_caps_curr as uc, household_caps_curr as hc, households as h where dc.digest = d.digest and d.parentdigest = u.digest and u.digest = uc.digest and u.parentdigest = h.digest and hc.digest = h.digest;
 
 CREATE TABLE userpoints (
-     pointperbyte integer default 0,
-     totalpoint integer default 0,
+     enabled integer default 0,
      peakhourstart timestamp,
      peakhourend timestamp,
+     baseline integer default 0,
+     pointperbyte integer default 0,
+     totalpoint integer default 0,
      digest md5_t references households(digest) ON DELETE CASCADE ON UPDATE CASCADE PRIMARY KEY 
 );
