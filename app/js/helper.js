@@ -529,6 +529,32 @@ var UCapCore = {
         UCapCore.logAction({fname:'getTimezone', params:obj.hid});
 	},
 	
+	setPeakHours: function(obj){
+		$.jsonRPC.request('ucap.set_peak_hours', {params:[obj.hid, obj.start, obj.end],
+            success:function () {
+                UCapManager.notification("notice", "Peak hours interval has been updated!");
+            },
+            error:function () {
+                UCapManager.notification("error", "Error: setPeakHours");
+            }
+        });
+        UCapCore.logAction({fname:'setPeakHours', params:obj.hid + ',' + obj.start + ',' + obj.end});
+	},
+	
+	getPeakHours: function(obj){
+		$.jsonRPC.request('ucap.get_peak_hours', {params:[obj.hid],
+            success:function (data) {
+                var result = data["result"];
+                if(obj.func)
+                    eval(obj.func + "({data:"+JSON.stringify(result)+"})"); //eval executes a function call based on function name (obj.func)
+            },
+            error:function () {
+                UCapManager.notification("error", "Error: getPeakHours");
+            }
+        });
+        UCapCore.logAction({fname:'getPeakHours', params:obj.hid});
+	},
+	
 	getShiftableUsage:function(obj){
         $.jsonRPC.request('ucap.get_shiftable_usage', {params:[obj.hid,obj.date],
             success:function (data) {

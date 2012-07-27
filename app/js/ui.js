@@ -193,12 +193,34 @@ function Setting_point() {
 			}
 		}
 	});
+	
+	UCapCore.getPeakHours({hid:UCapCore.household[0], func:'Settings_setPeakHoursInterval'});
+}
+
+function Settings_setPeakHoursInterval(obj){
+	var peakHoursStart = obj["data"][0][0];
+	peakHoursStart = Date.parse(peakHoursStart);
+	peakHoursStart = peakHoursStart.toString('h:mm tt');
+	$('input[name="peak-hours-start"]').val(peakHoursStart);
+	
+	var peakHoursEnd = obj["data"][0][1];
+	peakHoursEnd = Date.parse(peakHoursEnd);
+	peakHoursEnd = peakHoursEnd.toString('h:mm tt');
+	$('input[name="peak-hours-end"]').val(peakHoursEnd);
 }
 
 function Settings_savePointInfo(){
-    var peakHoursStart = $('input[name="peak-hours-start"]').val();
+	var peakHoursStart = $('input[name="peak-hours-start"]').val();
+	peakHoursStart = Date.parse(peakHoursStart);
+	peakHoursStart = peakHoursStart.toString('HH:mm:ss');
+	
 	var peakHoursEnd = $('input[name="peak-hours-end"]').val();
-    var pointsPerByte = $('input[name="points-per-byte"]').val();
+	peakHoursEnd = Date.parse(peakHoursEnd);
+	peakHoursEnd = peakHoursEnd.toString('HH:mm:ss');
+	
+	UCapCore.setPeakHours({hid:UCapCore.household[0], start:peakHoursStart, end:peakHoursEnd});
+	
+	var pointsPerByte = $('input[name="points-per-byte"]').val();
 }
 
 /* History Page */
