@@ -60,6 +60,10 @@ function Settings_formatAvatarModal() {
                     'musician_female_light','musician_male_dark','musician_male_light','person_coffeebreak_female_dark','person_coffeebreak_female_light',
                     'person_coffeebreak_male_dark','person_coffeebreak_male_light','person_undefined_female_dark','person_undefined_female_light','person_undefined_male_dark','person_undefined_male_light','pilotoldfashioned_female_dark',
                     'pilotoldfashioned_female_light','pilotoldfashioned_male_dark','pilotoldfashioned_male_light','viking_female','viking_male'];
+    
+	/* Upload button */
+	var template = '<li><a href="javascript:Settings_uploadAvatarForm();"><img class="profilePic" src="images/upload.png" /></a></li>';
+	$('#avatarList').append(template);
 	
 	$.each(avatars,function(index,value){
         template = '<li><a href="javascript:Settings_saveAvatar({photoid:\''+value+'\'});"><img class="profilePic" src="images/user_avatars/'+ value +'.jpg" /></a></li>';
@@ -76,6 +80,21 @@ function Settings_saveAvatar(obj){
     $('#profileCol .profilePic').attr('src', 'images/user_avatars/'+ obj.photoid +'.jpg');
     $('#header .profilePicThumb').attr('src', 'images/user_avatars/thumb/'+ obj.photoid +'.jpg');
     Settings_saveAccountInfo();
+}
+
+function Settings_uploadAvatarForm(){
+	$('#modalBox').dialog('close');
+	UCapManager.showDialog({src:"uploadAvatarModal",title:"Upload Avatar",type:"user",style:"wide"});
+}
+
+function Settings_uploadAvatar(){
+	$("#uploadAvatarForm").ajaxForm({
+		url: $.jsonRPC._requestUrl(''),
+		type: 'post',
+		target: '#avatarPreview',
+		resetForm: true ,
+		timeout: 5000 
+	}).submit();
 }
 
 function Settings_toggleChangePassword(){

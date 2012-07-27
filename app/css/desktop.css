@@ -165,6 +165,10 @@ body{
     padding: 0 2% 0 0;
 }
 
+.modalFormat #uploadAvatarForm{
+	text-align: center;	
+}
+
 .datepicker {
     width:240px;
 }
