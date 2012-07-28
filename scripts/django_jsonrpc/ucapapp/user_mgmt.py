@@ -633,6 +633,7 @@ def getPeakHoursUsage(hid,milestone,start,end,timezone):
 	#end = edate.strftime("%Y-%m-%d %H:%M:%S+00")
 	
 	totalUsage = 0
+	numOfDays = 0;
 	one_day = datetime.timedelta(days=1)
 	idate = sdate
 	idelta = edate - idate
@@ -648,8 +649,9 @@ def getPeakHoursUsage(hid,milestone,start,end,timezone):
 		
 		idate = idate + one_day
 		idelta = edate - idate
+		numOfDays += 1
 		
-	return totalUsage
+	return {'total_usage' : totalUsage, 'num_of_days' : numOfDays}
 
 def getShiftableDomain():
 	shiftable = ['akamai.net',

@@ -459,6 +459,22 @@ def set_timezone_dj(request,hid, timezone):
 def get_timezone_dj(request,hid):
     return getTimezone(hid)
 
+@jsonrpc_method('ucap.get_userpoint_enabled_households')
+def get_userpoint_enabled_households_dj(request):
+    return getUserpointEnabledHouseholds()
+
+@jsonrpc_method('ucap.enable_userpoint')
+def enable_userpoint_dj(request,hid):
+    return enableUserpoint(hid)
+
+@jsonrpc_method('ucap.disable_userpoint')
+def disable_userpoint_dj(request,hid):
+    return disableUserpoint(hid)
+
+@jsonrpc_method('ucap.is_userpoint_enabled')
+def is_userpoint_enabled_dj(request,hid):
+    return isUserpointEnabled(hid)
+
 @jsonrpc_method('ucap.set_peak_hours')
 def set_peak_hours_dj(request,hid,start,end):
     return setPeakHours(hid,start,end)
@@ -466,6 +482,34 @@ def set_peak_hours_dj(request,hid,start,end):
 @jsonrpc_method('ucap.get_peak_hours')
 def get_peak_hours_dj(request,hid):
     return getPeakHours(hid)
+
+@jsonrpc_method('ucap.set_peak_hours_baseline')
+def set_peak_hours_baseline_dj(request,hid,baseline):
+    return setPeakHoursBaseline(hid,baseline)
+
+@jsonrpc_method('ucap.get_peak_hours_baseline')
+def get_peak_hours_baseline_dj(request,hid):
+    return getPeakHoursBaseline(hid)
+
+@jsonrpc_method('ucap.reset_userpoint')
+def reset_userpoint_dj(request,hid):
+	return resetUserpoint(hid)
+
+@jsonrpc_method('ucap.add_userpoint')
+def add_userpoint_dj(request,hid,points):
+    return addUserpoint(hid,points)
+
+@jsonrpc_method('ucap.get_userpoint')
+def get_userpoint_dj(request,hid):
+    return getUserpoint(hid)
+
+@jsonrpc_method('ucap.set_pointperbyte')
+def set_pointperbyte_dj(request,hid,pointperbyte):
+    return setPointperbyte(hid,pointperbyte)
+
+@jsonrpc_method('ucap.get_pointperbyte')
+def get_pointperbyte_dj(request,hid):
+    return getPointperbyte(hid)
 
 @jsonrpc_method('ucap.get_peak_hours_usage')
 def get_peak_hours_usage_dj(request,hid,milestone):
@@ -1461,6 +1505,58 @@ def getTimezone(hid):
     except:
         return [0,('ERROR: No match found')]
 
+def getUserpointEnabledHouseholds():
+	tab = 'userpoints'
+	cmd = "select digest from %s where enabled=%d"%(tab,1)
+	res = sql.run_data_cmd(cmd)
+	
+	out = []
+	unittype = 'household'
+	tab = unitTables[unittype]
+	for rec in res:
+		digest = rec[0]
+		cmd = "select id from %s where digest='%s'"%(tab,digest)
+		res = sql.run_data_cmd(cmd)
+		out.append(res[0][0])
+	return out
+	
+def enableUserpoint(hid):
+	tab = 'userpoints'
+	digest = get_digest(hid=hid)
+	
+	#PostgreSQL doesn't support MERGE nor ON DUPLICATE KEY UPDATE so we have to go the lame way :(
+	cmd1 = "update %s set enabled=%d where digest='%s'"%(tab,1,digest)
+	cmd2 = "insert into %s (enabled,digest) values (%d,'%s')"%(tab,1,digest)
+	sql.run_insert_cmd(cmd1)
+	sql.run_insert_cmd(cmd2)
+	
+	try:
+		return [1,["SUCCESS"]]
+	except:
+		return [0,['ERROR: Could not update table']]
+
+def disableUserpoint(hid):
+	tab = 'userpoints'
+	digest = get_digest(hid=hid)
+
+	cmd = "update %s set enabled=%d where digest='%s'"%(tab,0,digest)
+	sql.run_insert_cmd(cmd)
+	try:
+		return [1,["SUCCESS"]]
+	except:
+		return [0,['ERROR: Could not update table']]
+	
+def isUserpointEnabled(hid):
+	tab = 'userpoints'
+	digest = get_digest(hid=hid)
+	cmd = "select enabled from %s where digest='%s'"%(tab,digest)
+	res = sql.run_data_cmd(cmd)
+	if len(res) == 0:
+		return False
+	elif res[0][0] == 0:
+		return False
+	return True
+
 def setPeakHours(hid,start,end):
     tab = 'userpoints'
     digest = get_digest(hid=hid)
@@ -1491,8 +1587,94 @@ def getPeakHours(hid):
     res = sql.run_data_cmd(cmd)
     return res
 
+def setPeakHoursBaseline(hid,baseline):
+	tab = 'userpoints'
+	digest = get_digest(hid=hid)
+	
+	#PostgreSQL doesn't support MERGE nor ON DUPLICATE KEY UPDATE so we have to go the lame way :(
+	cmd1 = "update %s set baseline=%d where digest='%s'"%(tab,baseline,digest)
+	cmd2 = "insert into %s (baseline,digest) values (%d,'%s')"%(tab,baseline,digest)
+	sql.run_insert_cmd(cmd1)
+	sql.run_insert_cmd(cmd2)
+	
+	try:
+		return [1,["SUCCESS"]]
+	except:
+		return [0,['ERROR: Could not update table']]
+	
+def getPeakHoursBaseline(hid):
+	tab = 'userpoints'
+	digest = get_digest(hid=hid)
+	cmd = "select baseline from %s where digest='%s'"%(tab,digest)
+	res = sql.run_data_cmd(cmd)
+	return res
+
+def resetUserpoint(hid):
+	tab = 'userpoints'
+	digest = get_digest(hid=hid)
+	
+	cmd = "update %s set totalpoint=%d where digest='%s'"%(tab,0,digest)
+	sql.run_insert_cmd(cmd)
+	
+	try:
+		return [1,["SUCCESS"]]
+	except:
+		return [0,['ERROR: Could not update table']]
+
+def setUserpoint(hid,points):
+	tab = 'userpoints'
+	digest = get_digest(hid=hid)
+	
+	cmd = "update %s set totalpoint=%d where digest='%s'"%(tab,points,digest)
+	sql.run_insert_cmd(cmd)
+	
+	try:
+		return [1,["SUCCESS"]]
+	except:
+		return [0,['ERROR: Could not update table']]
+
+def getUserpoint(hid):
+	tab = 'userpoints'
+	digest = get_digest(hid=hid)
+	cmd = "select totalpoint from %s where digest='%s'"%(tab,digest)
+	res = sql.run_data_cmd(cmd)
+	return res[0][0]
+
+def addUserpoint(hid,points):
+	totalpoint = getUserpoint(hid)
+	totalpoint = totalpoint + points
+	res = setUserpoint(hid,totalpoint)
+	if res[0] == 1:
+		return totalpoint
+	return -1
+	
+def setPointperbyte(hid,pointperbyte):
+	tab = 'userpoints'
+	digest = get_digest(hid=hid)
+	
+	#PostgreSQL doesn't support MERGE nor ON DUPLICATE KEY UPDATE so we have to go the lame way :(
+	cmd1 = "update %s set pointperbyte=%d where digest='%s'"%(tab,pointperbyte,digest)
+	cmd2 = "insert into %s (pointperbyte,digest) values (%d,'%s')"%(tab,pointperbyte,digest)
+	sql.run_insert_cmd(cmd1)
+	sql.run_insert_cmd(cmd2)
+	
+	try:
+		return [1,["SUCCESS"]]
+	except:
+		return [0,['ERROR: Could not update table']]
+	
+def getPointperbyte(hid):
+	tab = 'userpoints'
+	digest = get_digest(hid=hid)
+	cmd = "select pointperbyte from %s where digest='%s'"%(tab,digest)
+	res = sql.run_data_cmd(cmd)
+	return res[0][0]
+
 def getPeakHoursUsage(hid,milestone):
 	peakhours = getPeakHours(hid)
+	if len(peakhours) == 0:
+		return []
+		
 	start = peakhours[0][0]
 	end = peakhours[0][1]
 
