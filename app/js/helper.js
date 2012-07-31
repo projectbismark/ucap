@@ -9,6 +9,7 @@ var UCapCore = {
     users:[],
     devices:[],
     authed:false,
+	loaded:false,
 
     isAuthed:function () {
         $.jsonRPC.request('ucap.is_authed', {
@@ -16,9 +17,10 @@ var UCapCore = {
                 var result = data["result"];
                 if(result == 1){
                     if(!UCapCore.authed){
+						UCapCore.loaded = false;
                         UCapManager.initializeData();
-                        setTimeout(function(){UCapManager.showPage({pageID:UCapManager.getCurrentPage(),func: UCapManager.capFirstLetter(UCapManager.getCurrentPage())+'Page'})}, 250);
-                    }
+						UCapCore.waitForUcapCore();
+					}
                     UCapCore.authed = true;
                 } else {
                     UCapManager.showLoginPage();
@@ -29,6 +31,14 @@ var UCapCore = {
         });
         UCapCore.logAction({fname:'ucap.is_authed', params:''});
     },
+	
+	waitForUcapCore: function () {
+		if (UCapCore.loaded === true) {
+			setTimeout(function(){UCapManager.showPage({pageID:UCapManager.getCurrentPage(),func: UCapManager.capFirstLetter(UCapManager.getCurrentPage())+'Page'})}, 250);
+			return;
+		}
+		setTimeout(UCapCore.waitForUcapCore, 375);
+	},
 
     isAdmin: function(){
         var user = UCapCore.users[UCapCore.findUser({uid:localStorage['uid']})];
@@ -269,6 +279,7 @@ var UCapCore = {
                                                              var x = a[1].toLowerCase(), y = b[1].toLowerCase();
                                                              return x < y ? -1 : x > y ? 1 : 0;
                                                         });
+				UCapCore.loaded = true;
             },
             error:function () {
                 UCapManager.notification("error", "Error: getDevices");

@@ -374,26 +374,6 @@ function Network_deviceList() {
     var activeDevice = '';
 	
     for (var i = 0, j = UCapCore.users.length; i < j; i++) {
-		
-		if (UCapCore.devices[UCapCore.users[i][0]] == undefined)
-		{
-			/* We need to wait until Device list is populated. 
-			 * We have so many wrapper for UcapCore.getUsers; hence, 
-			 * $.when().then() doesn't work :(
-			 * TODO: modify UcapCore.getUsers & UcapCore.getDevices and use $.when().then()
-			 *
-			 * http://jsfiddle.net/f4hmL/5/
-			 * $.when(UCapCore.getUsers({hid:UCapCore.household[0]})).then(
-			 *		function(){ 
-			 *			alert ("UCapCore.devices.length: " + UCapCore.devices.length);
-			 *			Network_deviceList_populateDeviceList() 
-			 *		},
-			 *		function(){ }
-			 * );
-			 */
-			 spinWait(55);
-		}
-		
         if(UCapCore.devices[UCapCore.users[i][0]].length > 0){
             for(var l = 0, m = UCapCore.devices[UCapCore.users[i][0]].length; l < m; l++){
                 var device = UCapCore.devices[UCapCore.users[i][0]][l];
