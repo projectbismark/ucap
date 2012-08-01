@@ -799,6 +799,18 @@ function Network_Device_saveDeviceInfo() {
 
 
 /* Reward Page */
+function RewardPage_checkForUserPointEnabled() {
+	UCapCore.isUserpointEnabled({hid:UCapCore.household[0],func:'RewardPage_enableUserpoint'});
+}
+
+function RewardPage_enableUserpoint(obj) {
+	if (obj.data)
+	{
+		$("#menuBar #reward").css("display", "inline-block");
+		$("#settingsPage #point").css("display", "inline-block");
+	}
+}
+
 function RewardPage() {
 	UCapManager.loadModule({tar:'userContent', src:'rewardOverview', act:'overview',func:'Reward_rewardOverview'});
 }

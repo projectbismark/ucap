@@ -540,6 +540,20 @@ var UCapCore = {
         UCapCore.logAction({fname:'getTimezone', params:obj.hid});
 	},
 	
+	isUserpointEnabled: function(obj){
+		$.jsonRPC.request('ucap.is_userpoint_enabled', {params:[obj.hid],
+            success:function (data) {
+                var result = data["result"];
+                if(obj.func)
+                    eval(obj.func + "({data:"+JSON.stringify(result)+"})"); //eval executes a function call based on function name (obj.func)
+            },
+            error:function () {
+                UCapManager.notification("error", "Error: isUserpointEnabled");
+            }
+        });
+        UCapCore.logAction({fname:'isUserpointEnabled', params:obj.hid});
+	},
+	
 	setPeakHours: function(obj){
 		$.jsonRPC.request('ucap.set_peak_hours', {params:[obj.hid, obj.start, obj.end],
             success:function () {
