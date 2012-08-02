@@ -608,6 +608,26 @@ def getBytesBetween(hid,start,end,timezone):
 	res = sql.run_data_cmd(cmd)
 	
 	return res
+	
+def getPeakHoursUsageOnDay(hid,date,start,end,timezone):
+	arr_date = date.split('-')
+	arr_stemp = start.split(' ')
+	arr_stime = arr_stemp[1].split(':')
+	arr_etemp = end.split(' ')
+	arr_etime = arr_etemp[1].split(':')
+	sdate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), int(arr_stime[0]), int(arr_stime[1]), int(arr_stime[2]))
+	edate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), int(arr_etime[0]), int(arr_etime[1]), int(arr_etime[2]))
+	usage = getBytesBetween(hid,sdate,edate,timezone)
+	
+	totalUsage = 0
+	for idx in range(len(usage)):
+		if idx == 0:
+			# the byte usage is one hour offset-ed
+			continue
+		else:
+			totalUsage += usage[idx][1]
+	
+	return totalUsage
 
 def getPeakHoursUsage(hid,milestone,start,end,timezone):
 	# Definition:

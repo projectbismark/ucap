@@ -511,6 +511,10 @@ def set_pointperbyte_dj(request,hid,pointperbyte):
 def get_pointperbyte_dj(request,hid):
     return getPointperbyte(hid)
 
+@jsonrpc_method('ucap.get_peak_hours_usage_on_day')
+def get_peak_hours_usage_on_day_dj(request,hid,date):
+    return getPeakHoursUsageOnDay(hid,date)
+
 @jsonrpc_method('ucap.get_peak_hours_usage')
 def get_peak_hours_usage_dj(request,hid,milestone):
     return getPeakHoursUsage(hid,milestone)
@@ -1670,6 +1674,22 @@ def getPointperbyte(hid):
 	res = sql.run_data_cmd(cmd)
 	return res[0][0]
 
+def getPeakHoursUsageOnDay(hid,date):
+	peakhours = getPeakHours(hid)
+	if len(peakhours) == 0:
+		return []
+		
+	start = peakhours[0][0]
+	end = peakhours[0][1]
+	
+	timezone = getTimezone(hid)
+	if timezone[0] == 1:
+		timezone = timezone[1][1]
+	else:
+		timezone = 0
+		
+	return user_mgmt.getPeakHoursUsageOnDay(hid,date,start,end,timezone)
+	
 def getPeakHoursUsage(hid,milestone):
 	peakhours = getPeakHours(hid)
 	if len(peakhours) == 0:
