@@ -126,7 +126,7 @@ CREATE TABLE userpoints (
      peakhourstart timestamp,
      peakhourend timestamp,
      baseline integer default 0,
-     pointperbyte integer default 0,
+     pointperbyte real default 0.0,
      totalpoint integer default 0,
      digest md5_t references households(digest) ON DELETE CASCADE ON UPDATE CASCADE PRIMARY KEY 
 );

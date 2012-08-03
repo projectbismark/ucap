@@ -1657,8 +1657,8 @@ def setPointperbyte(hid,pointperbyte):
 	digest = get_digest(hid=hid)
 	
 	#PostgreSQL doesn't support MERGE nor ON DUPLICATE KEY UPDATE so we have to go the lame way :(
-	cmd1 = "update %s set pointperbyte=%d where digest='%s'"%(tab,pointperbyte,digest)
-	cmd2 = "insert into %s (pointperbyte,digest) values (%d,'%s')"%(tab,pointperbyte,digest)
+	cmd1 = "update %s set pointperbyte=%f where digest='%s'"%(tab,pointperbyte,digest)
+	cmd2 = "insert into %s (pointperbyte,digest) values (%f,'%s')"%(tab,pointperbyte,digest)
 	sql.run_insert_cmd(cmd1)
 	sql.run_insert_cmd(cmd2)
 	
@@ -1672,7 +1672,7 @@ def getPointperbyte(hid):
 	digest = get_digest(hid=hid)
 	cmd = "select pointperbyte from %s where digest='%s'"%(tab,digest)
 	res = sql.run_data_cmd(cmd)
-	return res[0][0]
+	return str(res[0][0])
 
 def getPeakHoursUsageOnDay(hid,date):
 	peakhours = getPeakHours(hid)

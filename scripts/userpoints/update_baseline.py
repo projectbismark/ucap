@@ -13,7 +13,7 @@ def log(message):
 	now = datetime.datetime.today()
 	sdate = now.strftime("%Y-%m-%d %H:%M:%S")
 	snow = now.strftime("%Y_%m_%d")
-	filename = 'log/baseline_update_' + snow + '.log'
+	filename = 'log/update_baseline_' + snow + '.log'
 	f = open(filename, 'a')
 	f.write(sdate + '\t')
 	f.write(message)
