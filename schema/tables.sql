@@ -130,3 +130,18 @@ CREATE TABLE userpoints (
      totalpoint integer default 0,
      digest md5_t references households(digest) ON DELETE CASCADE ON UPDATE CASCADE PRIMARY KEY 
 );
+
+CREATE TABLE userpoints_baseline (     
+	tstamp timestamp,
+	baseline integer default 0,
+	digest md5_t references households(digest) ON DELETE CASCADE ON UPDATE CASCADE,
+	PRIMARY KEY (tstamp, digest)
+);
+
+CREATE TABLE userpoints_points (
+	tstamp timestamp,
+	points integer default 0,
+	digest md5_t references households(digest) ON DELETE CASCADE ON UPDATE CASCADE,
+	PRIMARY KEY (tstamp, digest)
+);
+

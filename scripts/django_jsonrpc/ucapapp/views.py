@@ -1510,7 +1510,8 @@ def getTimezone(hid):
         return [0,('ERROR: No match found')]
 
 def getUserpointEnabledHouseholds():
-	tab = 'userpoints'
+	unittype = 'userpoints'
+	tab = userpointsTables[unittype]
 	cmd = "select digest from %s where enabled=%d"%(tab,1)
 	res = sql.run_data_cmd(cmd)
 	
@@ -1525,7 +1526,8 @@ def getUserpointEnabledHouseholds():
 	return out
 	
 def enableUserpoint(hid):
-	tab = 'userpoints'
+	unittype = 'userpoints'
+	tab = userpointsTables[unittype]
 	digest = get_digest(hid=hid)
 	
 	#PostgreSQL doesn't support MERGE nor ON DUPLICATE KEY UPDATE so we have to go the lame way :(
@@ -1540,7 +1542,8 @@ def enableUserpoint(hid):
 		return [0,['ERROR: Could not update table']]
 
 def disableUserpoint(hid):
-	tab = 'userpoints'
+	unittype = 'userpoints'
+	tab = userpointsTables[unittype]
 	digest = get_digest(hid=hid)
 
 	cmd = "update %s set enabled=%d where digest='%s'"%(tab,0,digest)
@@ -1551,7 +1554,8 @@ def disableUserpoint(hid):
 		return [0,['ERROR: Could not update table']]
 	
 def isUserpointEnabled(hid):
-	tab = 'userpoints'
+	unittype = 'userpoints'
+	tab = userpointsTables[unittype]
 	digest = get_digest(hid=hid)
 	cmd = "select enabled from %s where digest='%s'"%(tab,digest)
 	res = sql.run_data_cmd(cmd)
@@ -1562,38 +1566,47 @@ def isUserpointEnabled(hid):
 	return True
 
 def setPeakHours(hid,start,end):
-    tab = 'userpoints'
-    digest = get_digest(hid=hid)
-    
-    arr_sdate = start.split(':')
-    arr_edate = end.split(':')
-    now = datetime.datetime.utcnow()
-    start = datetime.datetime(now.year, now.month, now.day, int(arr_sdate[0]), int(arr_sdate[1]), int(arr_sdate[2]))
-    end = datetime.datetime(now.year, now.month, now.day, int(arr_edate[0]), int(arr_edate[1]), int(arr_edate[2]))
-    #start = start.strftime("%Y-%m-%d %H:%M:%S+00")
-    #end = end.strftime("%Y-%m-%d %H:%M:%S+00")
-    
-    #PostgreSQL doesn't support MERGE nor ON DUPLICATE KEY UPDATE so we have to go the lame way :(
-    cmd1 = "update %s set peakhourstart='%s', peakhourend='%s' where digest='%s'"%(tab,start,end,digest)
-    cmd2 = "insert into %s (peakhourstart,peakhourend,digest) values ('%s','%s','%s')"%(tab,start,end,digest)
-    sql.run_insert_cmd(cmd1)
-    sql.run_insert_cmd(cmd2)
-    
-    try:
-        return [1,["SUCCESS"]]
-    except:
-        return [0,['ERROR: Could not update table']]
+	unittype = 'userpoints'
+	tab = userpointsTables[unittype]
+	digest = get_digest(hid=hid)
+	
+	arr_sdate = start.split(':')
+	arr_edate = end.split(':')
+	now = datetime.datetime.utcnow()
+	start = datetime.datetime(now.year, now.month, now.day, int(arr_sdate[0]), int(arr_sdate[1]), int(arr_sdate[2]))
+	end = datetime.datetime(now.year, now.month, now.day, int(arr_edate[0]), int(arr_edate[1]), int(arr_edate[2]))
+	#start = start.strftime("%Y-%m-%d %H:%M:%S+00")
+	#end = end.strftime("%Y-%m-%d %H:%M:%S+00")
+	
+	#PostgreSQL doesn't support MERGE nor ON DUPLICATE KEY UPDATE so we have to go the lame way :(
+	cmd1 = "update %s set peakhourstart='%s', peakhourend='%s' where digest='%s'"%(tab,start,end,digest)
+	cmd2 = "insert into %s (peakhourstart,peakhourend,digest) values ('%s','%s','%s')"%(tab,start,end,digest)
+	sql.run_insert_cmd(cmd1)
+	sql.run_insert_cmd(cmd2)
+	
+	try:
+		return [1,["SUCCESS"]]
+	except:
+		return [0,['ERROR: Could not update table']]
 
-def getPeakHours(hid):    
-    tab = 'userpoints'
-    digest = get_digest(hid=hid)
-    cmd = "select peakhourstart,peakhourend from %s where digest='%s'"%(tab,digest)
-    res = sql.run_data_cmd(cmd)
-    return res
+def getPeakHours(hid):
+	unittype = 'userpoints'
+	tab = userpointsTables[unittype]
+	digest = get_digest(hid=hid)
+	cmd = "select peakhourstart,peakhourend from %s where digest='%s'"%(tab,digest)
+	res = sql.run_data_cmd(cmd)
+	return res
 
 def setPeakHoursBaseline(hid,baseline):
-	tab = 'userpoints'
 	digest = get_digest(hid=hid)
+	unittype = 'baseline'
+	tab = userpointsTables[unittype]
+	now = datetime.datetime.utcnow()
+	cmd = "insert into %s (tstamp,baseline,digest) values ('%s',%d,'%s')"%(tab,now,baseline,digest)
+	sql.run_insert_cmd(cmd)
+	
+	unittype = 'userpoints'
+	tab = userpointsTables[unittype]
 	
 	#PostgreSQL doesn't support MERGE nor ON DUPLICATE KEY UPDATE so we have to go the lame way :(
 	cmd1 = "update %s set baseline=%d where digest='%s'"%(tab,baseline,digest)
@@ -1607,26 +1620,24 @@ def setPeakHoursBaseline(hid,baseline):
 		return [0,['ERROR: Could not update table']]
 	
 def getPeakHoursBaseline(hid):
-	tab = 'userpoints'
+	unittype = 'userpoints'
+	tab = userpointsTables[unittype]
 	digest = get_digest(hid=hid)
 	cmd = "select baseline from %s where digest='%s'"%(tab,digest)
 	res = sql.run_data_cmd(cmd)
 	return res
 
-def resetUserpoint(hid):
-	tab = 'userpoints'
+def updatePointLog(hid, points):
 	digest = get_digest(hid=hid)
-	
-	cmd = "update %s set totalpoint=%d where digest='%s'"%(tab,0,digest)
+	unittype = 'points'
+	tab = userpointsTables[unittype]
+	now = datetime.datetime.utcnow()
+	cmd = "insert into %s (tstamp,points,digest) values ('%s',%d,'%s')"%(tab,now,points,digest)
 	sql.run_insert_cmd(cmd)
-	
-	try:
-		return [1,["SUCCESS"]]
-	except:
-		return [0,['ERROR: Could not update table']]
 
 def setUserpoint(hid,points):
-	tab = 'userpoints'
+	unittype = 'userpoints'
+	tab = userpointsTables[unittype]
 	digest = get_digest(hid=hid)
 	
 	cmd = "update %s set totalpoint=%d where digest='%s'"%(tab,points,digest)
@@ -1638,13 +1649,31 @@ def setUserpoint(hid,points):
 		return [0,['ERROR: Could not update table']]
 
 def getUserpoint(hid):
-	tab = 'userpoints'
+	unittype = 'userpoints'
+	tab = userpointsTables[unittype]
 	digest = get_digest(hid=hid)
 	cmd = "select totalpoint from %s where digest='%s'"%(tab,digest)
 	res = sql.run_data_cmd(cmd)
 	return res[0][0]
 
+def resetUserpoint(hid):
+	totalpoints = -1 * getUserpoint(hid)
+	updatePointLog(hid, totalpoints)
+	
+	unittype = 'userpoints'
+	tab = userpointsTables[unittype]
+	digest = get_digest(hid=hid)
+	cmd = "update %s set totalpoint=%d where digest='%s'"%(tab,0,digest)
+	sql.run_insert_cmd(cmd)
+	
+	try:
+		return [1,["SUCCESS"]]
+	except:
+		return [0,['ERROR: Could not update table']]
+
 def addUserpoint(hid,points):
+	updatePointLog(hid, points)
+	
 	totalpoint = getUserpoint(hid)
 	totalpoint = totalpoint + points
 	res = setUserpoint(hid,totalpoint)
@@ -1653,7 +1682,8 @@ def addUserpoint(hid,points):
 	return -1
 	
 def setPointperbyte(hid,pointperbyte):
-	tab = 'userpoints'
+	unittype = 'userpoints'
+	tab = userpointsTables[unittype]
 	digest = get_digest(hid=hid)
 	
 	#PostgreSQL doesn't support MERGE nor ON DUPLICATE KEY UPDATE so we have to go the lame way :(
@@ -1668,7 +1698,8 @@ def setPointperbyte(hid,pointperbyte):
 		return [0,['ERROR: Could not update table']]
 	
 def getPointperbyte(hid):
-	tab = 'userpoints'
+	unittype = 'userpoints'
+	tab = userpointsTables[unittype]
 	digest = get_digest(hid=hid)
 	cmd = "select pointperbyte from %s where digest='%s'"%(tab,digest)
 	res = sql.run_data_cmd(cmd)
