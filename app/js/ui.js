@@ -150,6 +150,7 @@ function Settings_setTimeZoneError(jqXHR, textStatus, errorThrown) {
 }
 
 function Setting_point() {
+	/*
 	$('input[name="peak-hours-start"]').ptTimeSelect({
 		containerClass: "timeCntr",
 		containerWidth: "350px",
@@ -193,8 +194,10 @@ function Setting_point() {
 			}
 		}
 	});
+	*/
 	
 	UCapCore.getPeakHours({hid:UCapCore.household[0], func:'Settings_setPeakHoursInterval'});
+	UCapCore.getPointPerByte({hid:UCapCore.household[0],func:'Settings_setPointPerByte'});
 }
 
 function Settings_setPeakHoursInterval(obj){
@@ -207,6 +210,12 @@ function Settings_setPeakHoursInterval(obj){
 	peakHoursEnd = Date.parse(peakHoursEnd);
 	peakHoursEnd = peakHoursEnd.toString('h:mm tt');
 	$('input[name="peak-hours-end"]').val(peakHoursEnd);
+}
+
+function Settings_setPointPerByte(obj){
+	var pointperbyte = obj["data"];
+	pointperbyte = parseFloat(pointperbyte);
+	$('input[name="points-per-byte"]').val(pointperbyte);
 }
 
 function Settings_savePointInfo(){
@@ -854,15 +863,30 @@ function Reward_rewardOverview_showUsage() {
             deviceList.push(UCapCore.devices[x][y][0]);
         }
     }
-
+	
+	UCapCore.getLastBillingCyclePeakHoursUsage({hid:UCapCore.household[0],func:'Reward_rewardOverview_LastBillingCyclePeakHoursUsage'});
+	UCapCore.getTotalUserpoint({hid:UCapCore.household[0],func:'Reward_rewardOverview_TotalUserpoint'});
     UCapCore.getDeviceUsageOnDay({hid:UCapCore.household[0],devices:deviceList,date:date,func:'Reward_rewardOverview_drawDeviceUsageGraph'});
-    UCapCore.getBytesOnDay({hid:UCapCore.household[0],date:date,func:'Reward_rewardOverview_drawBandwidthUsageGraph'});
+    //UCapCore.getBytesOnDay({hid:UCapCore.household[0],date:date,func:'Reward_rewardOverview_drawBandwidthUsageGraph'});
 	UCapCore.getBytesOnDay({hid:UCapCore.household[0],date:date,func:'Reward_rewardOverview_drawBandwidthUsagePercentage'});
-	UCapCore.getShiftableUsage({hid:UCapCore.household[0],date:date,func:'Reward_rewardOverview_drawShiftableUsageGraph'});
+	//UCapCore.getShiftableUsage({hid:UCapCore.household[0],date:date,func:'Reward_rewardOverview_drawShiftableUsageGraph'});
 	UCapCore.getShiftableUsage({hid:UCapCore.household[0],date:date,func:'Reward_rewardOverview_drawShiftableUsagePercentage'});
-	UCapCore.getDeviceDomainOnDay({hid:UCapCore.household[0],num:-1,date:date,func:'Reward_rewardOverview_showTopDomainList'});
+	UCapCore.getDeviceDomainOnDay({hid:UCapCore.household[0],num:5,date:date,func:'Reward_rewardOverview_showTopDomainList'});
     
     $('#rewardOverviewStat').slideDown('slow');
+}
+
+function Reward_rewardOverview_LastBillingCyclePeakHoursUsage(obj) {
+	var days = obj["data"]["num_of_days"];
+	var totalusage = obj["data"]["total_usage"];
+	var average = totalusage / days;
+	average = Math.round(average / 1048576);	// bytes to MB
+	$('#reward-overview-table-current-milestone').html(average);
+}
+
+function Reward_rewardOverview_TotalUserpoint(obj) {
+	var points = obj["data"];
+	$('#reward-overview-table-total-point').html(points);
 }
 
 function Reward_rewardOverview_drawDeviceUsageGraph(obj) {

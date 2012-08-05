@@ -592,6 +592,47 @@ var UCapCore = {
             }
         });
         UCapCore.logAction({fname:'getShiftableUsage', params:obj.hid + ',' + obj.date});
-    }
-
+    },
+	
+	getPointPerByte: function(obj){
+		$.jsonRPC.request('ucap.get_pointperbyte', {params:[obj.hid],
+            success:function (data) {
+                var result = data["result"];
+                if(obj.func)
+                    eval(obj.func + "({data:"+JSON.stringify(result)+"})"); //eval executes a function call based on function name (obj.func)
+            },
+            error:function () {
+                UCapManager.notification("error", "Error: getTotalUserpoint");
+            }
+        });
+        UCapCore.logAction({fname:'getTotalUserpoint', params:obj.hid});
+	},
+	
+	getTotalUserpoint: function(obj){
+		$.jsonRPC.request('ucap.get_userpoint', {params:[obj.hid],
+            success:function (data) {
+                var result = data["result"];
+                if(obj.func)
+                    eval(obj.func + "({data:"+JSON.stringify(result)+"})"); //eval executes a function call based on function name (obj.func)
+            },
+            error:function () {
+                UCapManager.notification("error", "Error: getTotalUserpoint");
+            }
+        });
+        UCapCore.logAction({fname:'getTotalUserpoint', params:obj.hid});
+	},
+	
+	getLastBillingCyclePeakHoursUsage: function(obj){
+		$.jsonRPC.request('ucap.get_peak_hours_usage', {params:[obj.hid,1],
+            success:function (data) {
+                var result = data["result"];
+                if(obj.func)
+                    eval(obj.func + "({data:"+JSON.stringify(result)+"})"); //eval executes a function call based on function name (obj.func)
+            },
+            error:function () {
+                UCapManager.notification("error", "Error: getLastBillingCyclePeakHoursUsage");
+            }
+        });
+        UCapCore.logAction({fname:'getLastBillingCyclePeakHoursUsage', params:obj.hid});
+	}
 };

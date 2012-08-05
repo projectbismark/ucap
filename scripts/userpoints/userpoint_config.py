@@ -16,6 +16,7 @@ def print_menu():
 	print '\t2. Disable userpoint system'
 	print '\t3. Reset userpoint system (set points to zero)'
 	print '\t4. Set point per byte value'
+	print '\t5. Set peak hours'
 	print '\t0. Print configuration menu'
 	print '\t-1. Exit'
 
@@ -87,6 +88,35 @@ def set_pointperbyte():
 		res = 'Error: router_id: ' + router_id + ' ; point_per_byte: ' + pointperbyte
 	print res
 
+def set_peakhours():
+	client = jsonrpclib.Server('https://localhost/json/json/')
+	router_id = get_router_id(client, True)
+	startpeakhour = "17:00:00"
+	endpeakhour = "20:00:00"
+	
+	while 1:
+		startpeakhour = raw_input("\nEnter start peak hour (17:00:00): ")
+		if startpeakhour == '':
+			print 'Empty value. Input again.'
+			continue
+		else:
+			break
+			
+	while 1:
+		endpeakhour = raw_input("\nEnter end peak hour (20:00:00): ")
+		if endpeakhour == '':
+			print 'Empty value. Input again.'
+			continue
+		else:
+			break
+	
+	print 'Setting point per byte value...'
+	try:
+		res = client.ucap.set_peak_hours(router_id, startpeakhour, endpeakhour)
+	except:
+		res = 'Error: router_id: ' + router_id + ' ; start_peak_hour: ' + startpeakhour + '; end_peak_hour' + endpeakhour
+	print res
+	
 
 ########
 # MAIN
@@ -105,6 +135,8 @@ def main():
 			reset_userpoint()
 		elif option == '4':
 			set_pointperbyte()
+		elif option == '5':
+			set_peakhours()
 		elif option == '0':
 			print_menu()
 		elif option == '-1':
