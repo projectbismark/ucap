@@ -83,7 +83,7 @@ def set_pointperbyte():
 	
 	print 'Setting point per byte value...'
 	try:
-		res = client.ucap.set_pointperbyte(router_id, int(pointperbyte))
+		res = client.ucap.set_pointperbyte(router_id, float(pointperbyte))
 	except:
 		res = 'Error: router_id: ' + router_id + ' ; point_per_byte: ' + pointperbyte
 	print res
