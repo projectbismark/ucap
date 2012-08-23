@@ -10,12 +10,10 @@ from django.conf import settings
 ##############################################
 
 def log(message):
-	curpath = os.path.abspath(os.curdir)
 	now = datetime.datetime.today()
 	sdate = now.strftime("%Y-%m-%d %H:%M:%S")
 	snow = now.strftime("%Y_%m_%d")
-	filename = 'log/update_baseline_' + snow + '.log'
-	filename = os.path.join(curpath, filename)
+	filename = '/tmp/ucaplog/update_baseline_' + snow + '.log'
 	f = open(filename, 'a')
 	f.write(sdate + '\t')
 	f.write(message)
