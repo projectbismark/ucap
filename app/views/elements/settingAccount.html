@@ -1,9 +1,23 @@
+<script type="text/javascript">
+    $(document).ready(function(){
+        if(!isAdmin()){
+            $('.tadmin').remove();
+        }
+    });
+	
+	/*
+	$("#menuBar").ready(function() {
+		RewardPage_checkForUserPointEnabled();
+	});
+	*/
+</script>
+
 <form id="acctInfo">
 
 	<ul class="left col80">
-		<li><div class="inputField"><label>Household Address</label><input title="Household Address" name="household-address" type="text" onchange="Settings_saveAccountInfo()"/></div><div class="helperText">Enter a name for your household.</div></li>
-		<li><div class="inputField"><label>Household Description</label><input title="Household Description" name="household-details" type="text" onchange="Settings_saveAccountInfo()"/></div><div class="helperText">Would you like to enter a few words to describe your account/household?</div></li>
-		<li><div class="inputField"><label>Time Zone </label>
+		<li class="tadmin"><div class="inputField"><label>Household Address</label><input title="Household Address" name="household-address" type="text" onchange="Settings_saveAccountInfo()"/></div><div class="helperText">Enter a name for your household.</div></li>
+		<li class="tadmin"><div class="inputField"><label>Household Description</label><input title="Household Description" name="household-details" type="text" onchange="Settings_saveAccountInfo()"/></div><div class="helperText">Would you like to enter a few words to describe your account/household?</div></li>
+		<li class="tadmin"><div class="inputField"><label>Time Zone </label>
 				<select title="Time Zone" name="household-time-zone" onchange="Settings_saveTimeZoneInfo()">
 					<option value="-12">UTC-12</option>
 					<option value="-11">UTC-11</option>
