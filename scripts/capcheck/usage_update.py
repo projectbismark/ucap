@@ -20,9 +20,8 @@ import string
 import pyinotify
 import psycopg2
 
-#CHECK_DIR = '/data2/users/hyojoon/bismark/test'
-CHECK_DIR = '/data/users/bismark/data/http_uploads/passive-frequent'
-MOVE_DIR = '/data2/users/hyojoon/bismark/usage_data_moved'
+CHECK_DIR = ''
+MOVE_DIR = ''
 CHECK_COUNTER = 6
 LOCAL_DB_PORT = 54322
 
@@ -33,7 +32,6 @@ MAC_START_POS = 5
 ## Deployment and test database
 DEPLOY = 1
 TEST = 2
-
 
 
 ####
@@ -78,6 +76,35 @@ def get_digest(cursor,hid=None,uid=None,did=None):
 ###
 
 
+### 
+def move_file_after_success(filename):
+    # Move file when done with processing
+    tmp_lst = (os.path.dirname(filename)).split('/')
+    if os.path.exists(MOVE_DIR+'/'+tmp_lst[-1])==False:
+        os.mkdir(MOVE_DIR+'/'+tmp_lst[-1])
+    shutil.move(filename,MOVE_DIR+'/'+filename.lstrip(CHECK_DIR))
+### 
+
+
+def reconnect_to_database():
+    while (1):
+        sql_host = get_config(DEPLOY, 'sql_host').strip()
+        sql_user = get_config(DEPLOY, 'sql_user').strip()
+        sql_passwd = get_config(DEPLOY, 'sql_passwd').strip()
+        sql_db = get_config(DEPLOY, 'sql_db').strip()
+
+        try:
+            conn = psycopg2.connect(database=sql_db, host=sql_host, user=sql_user,\
+                            password=sql_passwd, port=LOCAL_DB_PORT)
+            print 'CONNECTED!!'
+            cursor = conn.cursor()
+            break
+        except:
+            print 'Unable to connect to database. Continue trying..'
+            time.sleep(5)
+            continue
+
+    return conn
 
 ############ FILE FORMAT ##########
 # format_version
@@ -131,6 +158,7 @@ def process_file(filename, cursor, hid_str):
                             parentdigest_str = get_digest(cursor,hid_str,'default')
                             cmd = "INSERT into devices (id,name,details,notify,notifyperc,notified,photo,macid,parentdigest) values('%s','%s','N/A','f','80','f','','{%s}','%s')"\
                                    %(mac_str,mac_str,mac_str,parentdigest_str)
+
                             cursor.execute(cmd)
                             digest_str = get_digest(cursor,hid_str,'default',mac_str)
                             print 'New Device Added'
@@ -138,22 +166,28 @@ def process_file(filename, cursor, hid_str):
                             cmd = "UPDATE device_caps_curr set usage=%s where digest='%s'" %(usage_str,digest_str)
                             cursor.execute(cmd)
                             print 'Usage Updated'
-                    except:
-                        print 'Failed in database command sequence.'
-                        time.sleep(5)
-                        return -1
+#                    except:
+                    except Exception, err:
+                        sys.stderr.write('ERROR: %s\n' % str(err))
+                        print 'Failed in database command sequence: '+err.pgcode
+                        if err.pgcode[:2] == '08': # Connection exception
+                            time.sleep(1)
+                            return -1
+                        else:
+                            return -2
 
-        # Move file when done with processing
-        tmp_lst = (os.path.dirname(filename)).split('/')
-        if os.path.exists(MOVE_DIR+'/'+tmp_lst[-1])==False:
-            os.mkdir(MOVE_DIR+'/'+tmp_lst[-1])
-        shutil.move(filename,MOVE_DIR+'/'+filename.lstrip(CHECK_DIR))
-#        shutil.copy(filename,MOVE_DIR+'/'+filename.lstrip(CHECK_DIR))
+#        # Move file when done with processing
+#        tmp_lst = (os.path.dirname(filename)).split('/')
+#        if os.path.exists(MOVE_DIR+'/'+tmp_lst[-1])==False:
+#            os.mkdir(MOVE_DIR+'/'+tmp_lst[-1])
+#        shutil.move(filename,MOVE_DIR+'/'+filename.lstrip(CHECK_DIR))
+##        shutil.copy(filename,MOVE_DIR+'/'+filename.lstrip(CHECK_DIR))
 
     else:
         print 'Wrong format'
         print lines_lst
 
+    return 0
 
 def process_existing(conn, cursor):
     tmp_lst = []
@@ -178,10 +212,27 @@ def process_existing(conn, cursor):
                     hid_str = tmp_lst[0]
 
                     r_check = process_file(CHECK_DIR+'/'+dirc+'/'+files, cursor, hid_str)
-                    if r_check != -1:
-                        conn.commit()
-                    else:
+                    if r_check == -1: # Connection error when executing database command.
+                        conn = reconnect_to_database();
+                        cursor = conn.cursor()
+                        return 
+
+                    elif r_check == -2:
+                        conn.rollback()
                         break
+
+                    else: # Execution success. Now try to commit changes.
+                        try:
+                            conn.commit()
+                            # Success!! Now, move the file.
+                            ffname = CHECK_DIR+'/'+dirc+'/'+files
+                            move_file_after_success(ffname)
+    
+                        except Exception, err:
+                            print "Commit error:" + str(err)
+                            conn = reconnect_to_database();
+                            cursor = conn.cursor()
+                            return
 
 ### main ###
 def main():
@@ -197,8 +248,6 @@ def main():
     #    sql_user_test = get_config(TEST, 'sql_user').strip()
     #    sql_passwd_test = get_config(TEST, 'sql_passwd').strip()
     #    sql_db_test = get_config(TEST, 'sql_db').strip()
-    
-    
         try:
             conn = psycopg2.connect(database=sql_db, host=sql_host, user=sql_user, password=sql_passwd, port=LOCAL_DB_PORT)
             print 'CONNECTED!!'
@@ -206,10 +255,11 @@ def main():
         except:
             print 'Unable to connect to database. Continue trying..'
             time.sleep(5)
-#            sys.exit()
             continue
         
     cursor = conn.cursor()
+    testvar = 'bka'
+
 
     # process existing files
     process_existing(conn,cursor)
@@ -222,6 +272,8 @@ def main():
     class EventHandler(pyinotify.ProcessEvent):
         def process_IN_CREATE(self,event):
             print 'Created:', event.pathname
+            self.conn = conn
+            self.cursor = cursor
 
             # Get household id.
             hid_time_seq = event.pathname.split('-')
@@ -238,11 +290,25 @@ def main():
 
             # if regular file, process it.
             else:
-                count_check = process_file(event.pathname, cursor,  hid_str)
-                conn.commit()
+                count_check = process_file(event.pathname, self.cursor,  hid_str)
+                if count_check == -1: # Connection error when executing database command.
+                    self.conn = reconnect_to_database();
+                    self.cursor = self.conn.cursor()
+
+                else: # Execution success. Now try to commit changes.
+                    try:
+                        conn.commit()
+                        # Success!! Now, move the file.
+                        ffname = event.pathname
+                        move_file_after_success(ffname)
+    
+                    except Exception, err:
+                        print "Commit error:" + str(err)
+                        self.conn = reconnect_to_database();
+                        self.cursor = self.conn.cursor()
 
             print "Start processing existing stuff again"
-            process_existing(conn,cursor)
+            process_existing(self.conn,self.cursor)
 
     handler = EventHandler()
     notifier = pyinotify.Notifier(wm, handler)
