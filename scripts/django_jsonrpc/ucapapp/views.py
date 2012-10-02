@@ -1413,6 +1413,7 @@ def save_upload(img_file,name):
     return path
 
 def update_house_startdate(hid,startdate):
+    # home
     utype = 'household'
     tab = capTables[utype]
     digest = get_digest(hid=hid)
@@ -1420,6 +1421,32 @@ def update_house_startdate(hid,startdate):
     cmd2 = "update %s set enddt = startdt + interval '1 month' where digest = '%s'"%(tab,digest)
     res = sql.run_insert_cmd(cmd1)
     res = sql.run_insert_cmd(cmd2)
+
+    # user
+    utype = 'user'
+    tab = capTables[utype]
+    digest = get_digest(hid=hid,uid='default')
+    cmd1 = "update %s set startdt = '%s' where digest = '%s'"%(tab,startdate,digest)
+    cmd2 = "update %s set enddt = startdt + interval '1 month' where digest = '%s'"%(tab,digest)
+    res = sql.run_insert_cmd(cmd1)
+    res = sql.run_insert_cmd(cmd2)
+ 
+    # device
+    utype = 'device'
+    tab = capTables[utype]
+    digest = get_digest(hid=hid,uid='default')
+    cmd1 = "SELECT digest from devices where parentdigest = '%s'"%(digest)
+    res1 = sql.run_data_cmd(cmd1)
+    try:
+      if res1[0] == 0:
+        return [0,'ERROR']
+      for rec in res1:
+        cmd2 = "update %s set startdt = '%s' where digest = '%s'"%(tab,startdate,rec[0])
+        cmd3 = "update %s set enddt = startdt + interval '1 month' where digest = '%s'"%(tab,rec[0])
+        res = sql.run_insert_cmd(cmd2)
+        res = sql.run_insert_cmd(cmd3)
+    except:
+      return [0,'ERROR']
     
     return [res]
 
