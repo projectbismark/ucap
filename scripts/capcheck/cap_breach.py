@@ -183,10 +183,12 @@ def take_action(conn, action, target):
                     if tmp2_lst['result'][0]==1 and tmp3_lst['result'][0]==1:
                         recv_str = tmp2_lst['result'][1][8]
                         dev_name = tmp3_lst['result'][1][1]
-                        percent_str = tmp3_lst['result'][1][4]
-                        email_notified = tmp3_lst['result'][1][5]
-                        if email_notified=='f':
+                        email_notify_set = tmp3_lst['result'][1][5]
+                        percent_str = tmp3_lst['result'][1][6]
+                        email_notified = tmp3_lst['result'][1][7]
+                        if email_notified=='f' and email_notify_set=='t':
                             ret = send_noti_email(action,recv_str,percent_str,dev_name)
+                            print "send email"
                             # Set that device is notified.
                             if not ret<0:
                                 client.ucap.updateDeviceMetaInfo_ex(hid_str,uid_str,did_str_lst[0],'','','','','t','')
