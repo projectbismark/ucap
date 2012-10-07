@@ -20,8 +20,8 @@ import string
 import pyinotify
 import psycopg2
 
-CHECK_DIR = ''
-MOVE_DIR = ''
+CHECK_DIR = '/data/users/bismark/data/http_uploads/passive-frequent'
+MOVE_DIR = '/data2/users/hyojoon/bismark/usage_data_moved'
 CHECK_COUNTER = 6
 LOCAL_DB_PORT = 54322
 
@@ -167,12 +167,13 @@ def process_file(filename, cursor, hid_str):
                             cursor.execute(cmd)
                             print 'Usage Updated'
 #                    except:
-                    except Exception, err:
+                    except Exception as err:
                         sys.stderr.write('ERROR: %s\n' % str(err))
-                        print 'Failed in database command sequence: '+err.pgcode
-                        if err.pgcode[:2] == '08': # Connection exception
-                            time.sleep(1)
-                            return -1
+                        print 'Failed in database command sequence: '+str(err.pgcode)
+                        if err.pgcode is not None:
+                            if err.pgcode[:2] == '08': # Connection exception
+                                time.sleep(1)
+                                return -1
                         else:
                             return -2
 
@@ -196,7 +197,7 @@ def process_existing(conn, cursor):
     # Sweep the Check directorty, and process any existing files first.
     dir_lst = os.listdir(CHECK_DIR)
     for dirc in dir_lst:
-        if dirc!='OWC43DC7B0AE63':
+        if dirc!='OWC43DC7B0AE63' and dirc!='OWC43DC7A37C0D':
             if os.path.isdir(CHECK_DIR+'/'+dirc):
                 tmp_lst = (CHECK_DIR+'/'+dirc).split('/')
                 # if new directory, make it on moved_dir.
@@ -228,7 +229,7 @@ def process_existing(conn, cursor):
                             ffname = CHECK_DIR+'/'+dirc+'/'+files
                             move_file_after_success(ffname)
     
-                        except Exception, err:
+                        except Exception as err:
                             print "Commit error:" + str(err)
                             conn = reconnect_to_database();
                             cursor = conn.cursor()
@@ -288,25 +289,29 @@ def main():
                if os.path.exists(MOVE_DIR+'/'+tmp_lst[-1])==False:
                  os.mkdir(MOVE_DIR+'/'+tmp_lst[-1])
 
-            # if regular file, process it.
-            else:
-                count_check = process_file(event.pathname, self.cursor,  hid_str)
-                if count_check == -1: # Connection error when executing database command.
-                    self.conn = reconnect_to_database();
-                    self.cursor = self.conn.cursor()
+            print tmp_lst[-1]
+            if tmp_lst[-1] == 'OWC43DC7A37C0D':
+                return
 
-                else: # Execution success. Now try to commit changes.
-                    try:
-                        conn.commit()
-                        # Success!! Now, move the file.
-                        ffname = event.pathname
-                        move_file_after_success(ffname)
-    
-                    except Exception, err:
-                        print "Commit error:" + str(err)
-                        self.conn = reconnect_to_database();
-                        self.cursor = self.conn.cursor()
-
+#            # if regular file, process it.
+#            else:
+#                count_check = process_file(event.pathname, self.cursor,  hid_str)
+#                if count_check == -1: # Connection error when executing database command.
+#                    self.conn = reconnect_to_database();
+#                    self.cursor = self.conn.cursor()
+#
+#                else: # Execution success. Now try to commit changes.
+#                    try:
+#                        conn.commit()
+#                        # Success!! Now, move the file.
+#                        ffname = event.pathname
+#                        move_file_after_success(ffname)
+#    
+#                    except Exception, err:
+#                        print "Commit error:" + str(err)
+#                        self.conn = reconnect_to_database();
+#                        self.cursor = self.conn.cursor()
+#
             print "Start processing existing stuff again"
             process_existing(self.conn,self.cursor)
 
