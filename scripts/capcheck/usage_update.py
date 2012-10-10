@@ -218,10 +218,15 @@ def process_existing(conn, cursor):
                         cursor = conn.cursor()
                         return 
 
+                    # None, or something error than connection error..
                     elif r_check == -2:
-                        conn.rollback()
-                        break
-
+                        try:
+                            conn.rollback()
+                        except Exception:
+                            conn = reconnect_to_database();
+                            cursor = conn.cursor()
+                        finally:
+                            break
                     else: # Execution success. Now try to commit changes.
                         try:
                             conn.commit()
