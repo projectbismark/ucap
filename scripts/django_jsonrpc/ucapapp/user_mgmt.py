@@ -469,21 +469,21 @@ def getBytesOnDay(nodeid,date,timezone):
     return out
 
 def getBytesOnDayNonAnonymized(nodeid,date,timezone):
-	bytes_on_day = getBytesOnDay(nodeid,date,timezone)
-	anonymized_domain_on_day = getAnonymizedDomainUsageOnDay(nodeid,date,timezone)
-	
-	out = []
-	for rec in bytes_on_day:
-		date = rec[0]
-		byte = rec[1]
-		other = 0
-		try:
-			other = anonymized_domain_on_day[date][0][1]
-		except:
-			other = 0
-		out.append((date,byte - other))
-			
-	return out
+    bytes_on_day = getBytesOnDay(nodeid,date,timezone)
+    anonymized_domain_on_day = getAnonymizedDomainUsageOnDay(nodeid,date,timezone)
+    
+    out = []
+    for rec in bytes_on_day:
+        date = rec[0]
+        byte = rec[1]
+        other = 0
+        try:
+            other = anonymized_domain_on_day[date][0][1]
+        except:
+            other = 0
+        out.append((date,byte - other))
+            
+    return out
 
 def getAllBytesOnDay(date,timezone):
     # Get all node_id
@@ -505,248 +505,251 @@ def getAllBytesOnDay(date,timezone):
     return out
 
 def getDeviceUsageInterval(macs,start,end,timezone):
-	delta = datetime.timedelta(hours=timezone)
-	arr_sdate = start.split('-')
-	sdate = datetime.datetime(int(arr_sdate[0]), int(arr_sdate[1]), int(arr_sdate[2]), 0, 0, 0)
-	sdate = sdate - delta
-	start = sdate.strftime("%Y-%m-%d %H:%M:%S+00")
-	
-	arr_edate = end.split('-')
-	edate = datetime.datetime(int(arr_edate[0]), int(arr_edate[1]), int(arr_edate[2]), 0, 0, 0)
-	edate = edate - delta
-	end = edate.strftime("%Y-%m-%d %H:%M:%S+00")
-	
-	gmacs = get_group(macs,"'")
-	cmd = "select devices.name, date(t.timestamp) as d, sum(t.bytes) from bismark_passive.bytes_per_device_per_hour as t,devices where t.mac_address in %s and devices.macid[1]=t.mac_address and t.timestamp between '%s' and '%s' group by devices.name,t.mac_address,d order by t.mac_address,d asc"%(gmacs,start,end)
-	#  cmd = "select t.mac_address, date(t.timestamp) as d, sum(t.bytes) from bismark_passive.bytes_per_device_per_hour as t where t.mac_address in %s and t.timestamp between '%s' and '%s' group by t.mac_address,d order by t.mac_address,d asc"%(gmacs,start,end)
-	res = sql.run_data_cmd(cmd)
-	out = {}
-	thedate = ''
-	value = 0
-	sd = datetime.datetime(int(arr_sdate[0]), int(arr_sdate[1]), int(arr_sdate[2]))
-	ed = datetime.datetime(int(arr_edate[0]), int(arr_edate[1]), int(arr_edate[2]))
-	
-	# Deal with data from database first
-	for rec in res:
-		try:
-			out[rec[0]].append((rec[1],rec[2]))
-		except:
-			out[rec[0]] = []
-			out[rec[0]].append((rec[1],rec[2]))
-	
-	# Fill in 0s for missing dates (where usage is actually 0).
-	for dev in out:
-		for n in range((ed-sd).days+1):
-			found = False
-			curr_date_d = sd+datetime.timedelta(n)
-			curr_date = (curr_date_d).timetuple()
-			for entry in out[dev]:
-				entry_date = time.strptime(entry[0],'%Y-%m-%d')
-				if curr_date == entry_date:
-					found = True
-					break
-			if found is False:
-				scurr_date_d = curr_date_d.strftime("%Y-%m-%d")
-				out[dev].append((scurr_date_d,0))
-		out[dev] = sorted(out[dev], key=lambda dates: dates[0])
-	
-	return out
-	
+    delta = datetime.timedelta(hours=timezone)
+    arr_sdate = start.split('-')
+    sdate = datetime.datetime(int(arr_sdate[0]), int(arr_sdate[1]), int(arr_sdate[2]), 0, 0, 0)
+    sdate = sdate - delta
+    start = sdate.strftime("%Y-%m-%d %H:%M:%S+00")
+    
+    arr_edate = end.split('-')
+    edate = datetime.datetime(int(arr_edate[0]), int(arr_edate[1]), int(arr_edate[2]), 0, 0, 0)
+    edate = edate - delta
+    end = edate.strftime("%Y-%m-%d %H:%M:%S+00")
+    
+    gmacs = get_group(macs,"'")
+    cmd = "select devices.name, date(t.timestamp) as d, sum(t.bytes) from bismark_passive.bytes_per_device_per_hour as t,devices where t.mac_address in %s and devices.macid[1]=t.mac_address and t.timestamp between '%s' and '%s' group by devices.name,t.mac_address,d order by t.mac_address,d asc"%(gmacs,start,end)
+    #  cmd = "select t.mac_address, date(t.timestamp) as d, sum(t.bytes) from bismark_passive.bytes_per_device_per_hour as t where t.mac_address in %s and t.timestamp between '%s' and '%s' group by t.mac_address,d order by t.mac_address,d asc"%(gmacs,start,end)
+    res = sql.run_data_cmd(cmd)
+    out = {}
+    thedate = ''
+    value = 0
+    sd = datetime.datetime(int(arr_sdate[0]), int(arr_sdate[1]), int(arr_sdate[2]))
+    ed = datetime.datetime(int(arr_edate[0]), int(arr_edate[1]), int(arr_edate[2]))
+    
+    # Deal with data from database first
+    for rec in res:
+        try:
+            out[rec[0]].append((rec[1],rec[2]))
+        except:
+            out[rec[0]] = []
+            out[rec[0]].append((rec[1],rec[2]))
+    
+    # Fill in 0s for missing dates (where usage is actually 0).
+    for dev in out:
+        for n in range((ed-sd).days+1):
+            found = False
+            curr_date_d = sd+datetime.timedelta(n)
+            curr_date = (curr_date_d).timetuple()
+            for entry in out[dev]:
+                entry_date = time.strptime(entry[0],'%Y-%m-%d')
+                if curr_date == entry_date:
+                    found = True
+                    break
+            if found is False:
+                scurr_date_d = curr_date_d.strftime("%Y-%m-%d")
+                out[dev].append((scurr_date_d,0))
+        out[dev] = sorted(out[dev], key=lambda dates: dates[0])
+    
+    return out
+    
 def getDomainUsageInterval(nodeid,topn,start,end,timezone):
-	delta = datetime.timedelta(hours=timezone)
-	arr_sdate = start.split('-')
-	sdate = datetime.datetime(int(arr_sdate[0]), int(arr_sdate[1]), int(arr_sdate[2]), 0, 0, 0)
-	sdate = sdate - delta
-	start = sdate.strftime("%Y-%m-%d %H:%M:%S+00")
-	
-	arr_edate = end.split('-')
-	edate = datetime.datetime(int(arr_edate[0]), int(arr_edate[1]), int(arr_edate[2]), 0, 0, 0)
-	edate = edate - delta
-	end = edate.strftime("%Y-%m-%d %H:%M:%S+00")
-	
-	cmd = "select t.domain, sum(t.bytes) as s from bismark_passive.bytes_per_domain_per_hour as t where node_id = '%s' and t.timestamp between '%s' and '%s' group by t.domain order by s desc"%(nodeid,start,end)
-	res = sql.run_data_cmd(cmd)
-	doms = []
-	tot = 0
-	for rec in res:
-		tot += int(rec[1])
-		if rec[0] is not None:
-			doms.append((rec[0],rec[1]))
-	tdoms = doms[:topn]
-	
-	#  print tot
-	out = {"other":[]}
-	otot = 0
-	for domd in tdoms:
-		try:
-			out[domd[0]].append((domd[1],float(domd[1])/tot))
-			otot += domd[1]
-		except:
-			out[domd[0]] = []
-			out[domd[0]].append((domd[1],float(domd[1])/tot))
-			otot += domd[1]
-	out["other"].append((tot-otot,(tot-otot)/tot)) 
-	
-	return out 
+    delta = datetime.timedelta(hours=timezone)
+    arr_sdate = start.split('-')
+    sdate = datetime.datetime(int(arr_sdate[0]), int(arr_sdate[1]), int(arr_sdate[2]), 0, 0, 0)
+    sdate = sdate - delta
+    start = sdate.strftime("%Y-%m-%d %H:%M:%S+00")
+    
+    arr_edate = end.split('-')
+    edate = datetime.datetime(int(arr_edate[0]), int(arr_edate[1]), int(arr_edate[2]), 0, 0, 0)
+    edate = edate - delta
+    end = edate.strftime("%Y-%m-%d %H:%M:%S+00")
+    
+    cmd = "select t.domain, sum(t.bytes) as s from bismark_passive.bytes_per_domain_per_hour as t where node_id = '%s' and t.timestamp between '%s' and '%s' group by t.domain order by s desc"%(nodeid,start,end)
+    res = sql.run_data_cmd(cmd)
+    doms = []
+    tot = 0
+    for rec in res:
+        tot += int(rec[1])
+        if rec[0] is not None:
+            doms.append((rec[0],rec[1]))
+    tdoms = doms[:topn]
+    
+    #  print tot
+    out = {"other":[]}
+    otot = 0
+    for domd in tdoms:
+        try:
+            out[domd[0]].append((domd[1],float(domd[1])/tot))
+            otot += domd[1]
+        except:
+            out[domd[0]] = []
+            out[domd[0]].append((domd[1],float(domd[1])/tot))
+            otot += domd[1]
+    if tot != 0:
+        out["other"].append((tot-otot,(tot-otot)/tot)) 
+    else:
+        out["other"].append((0,0)) 
+    
+    return out 
 
 def getStartBillingDate(hid):
-	digest = get_digest(hid=hid)
-	cmd = "select startdt from household_caps_curr where digest='%s'"%(digest)
-	res = sql.run_data_cmd(cmd)
-	return res
+    digest = get_digest(hid=hid)
+    cmd = "select startdt from household_caps_curr where digest='%s'"%(digest)
+    res = sql.run_data_cmd(cmd)
+    return res
 
 def getBytesBetween(hid,start,end,timezone):
-	# start and end should be in datetime format
-	delta = datetime.timedelta(hours=timezone)
-	start = start - delta
-	start = start.strftime("%Y-%m-%d %H:%M:%S+00")
-	
-	end = end - delta
-	end = end.strftime("%Y-%m-%d %H:%M:%S+00")
-	
-	cmd = "select t.timestamp as d, t.bytes as s from bismark_passive.bytes_per_hour as t where t.node_id='%s' and t.timestamp between '%s' and '%s' order by d asc"%(hid,start,end)
-	res = sql.run_data_cmd(cmd)
-	
-	return res
-	
+    # start and end should be in datetime format
+    delta = datetime.timedelta(hours=timezone)
+    start = start - delta
+    start = start.strftime("%Y-%m-%d %H:%M:%S+00")
+    
+    end = end - delta
+    end = end.strftime("%Y-%m-%d %H:%M:%S+00")
+    
+    cmd = "select t.timestamp as d, t.bytes as s from bismark_passive.bytes_per_hour as t where t.node_id='%s' and t.timestamp between '%s' and '%s' order by d asc"%(hid,start,end)
+    res = sql.run_data_cmd(cmd)
+    
+    return res
+    
 def getPeakHoursUsageOnDay(hid,date,start,end,timezone):
-	arr_date = date.split('-')
-	arr_stemp = start.split(' ')
-	arr_stime = arr_stemp[1].split(':')
-	arr_etemp = end.split(' ')
-	arr_etime = arr_etemp[1].split(':')
-	sdate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), int(arr_stime[0]), int(arr_stime[1]), int(arr_stime[2]))
-	edate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), int(arr_etime[0]), int(arr_etime[1]), int(arr_etime[2]))
-	usage = getBytesBetween(hid,sdate,edate,timezone)
-	
-	totalUsage = 0
-	for idx in range(len(usage)):
-		if idx == 0:
-			# the byte usage is one hour offset-ed
-			continue
-		else:
-			totalUsage += usage[idx][1]
-	
-	return totalUsage
+    arr_date = date.split('-')
+    arr_stemp = start.split(' ')
+    arr_stime = arr_stemp[1].split(':')
+    arr_etemp = end.split(' ')
+    arr_etime = arr_etemp[1].split(':')
+    sdate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), int(arr_stime[0]), int(arr_stime[1]), int(arr_stime[2]))
+    edate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), int(arr_etime[0]), int(arr_etime[1]), int(arr_etime[2]))
+    usage = getBytesBetween(hid,sdate,edate,timezone)
+    
+    totalUsage = 0
+    for idx in range(len(usage)):
+        if idx == 0:
+            # the byte usage is one hour offset-ed
+            continue
+        else:
+            totalUsage += usage[idx][1]
+    
+    return totalUsage
 
 def getPeakHoursUsage(hid,milestone,start,end,timezone):
-	# Definition:
-	# The length of a milestone is one month. It is a multiple of billing period.
-	
-	startBillingDate = getStartBillingDate(hid)
-	arr_sbd = startBillingDate[0][0].split(' ')
-	arr_sbd = arr_sbd[0].split('-')
-	
-	smilestone = relativedelta(months=milestone)
-	emilestone = relativedelta(months=(milestone - 1))
-	
-	arr_stemp = start.split(' ')
-	arr_stime = arr_stemp[1].split(':')
-	sdate = datetime.datetime(int(arr_sbd[0]), int(arr_sbd[1]), int(arr_sbd[2]), int(arr_stime[0]), int(arr_stime[1]), int(arr_stime[2]))
-	sdate = sdate - smilestone
-	#start = sdate.strftime("%Y-%m-%d %H:%M:%S+00")
-	
-	arr_etemp = end.split(' ')
-	arr_etime = arr_etemp[1].split(':')
-	edate = datetime.datetime(int(arr_sbd[0]), int(arr_sbd[1]), int(arr_sbd[2]), int(arr_etime[0]), int(arr_etime[1]), int(arr_etime[2]))
-	edate = edate - emilestone
-	#end = edate.strftime("%Y-%m-%d %H:%M:%S+00")
-	
-	totalUsage = 0
-	numOfDays = 0;
-	one_day = datetime.timedelta(days=1)
-	idate = sdate
-	idelta = edate - idate
-	while idelta.days > 0:
-		iedate = datetime.datetime(idate.year, idate.month, idate.day, edate.hour, edate.minute, edate.second)
-		usage = getBytesBetween(hid,idate,iedate,timezone)
-		for idx in range(len(usage)):
-			if idx == 0:
-				# the byte usage is one hour offset-ed
-				continue
-			else:
-				totalUsage += usage[idx][1]
-		
-		idate = idate + one_day
-		idelta = edate - idate
-		numOfDays += 1
-		
-	return {'total_usage' : totalUsage, 'num_of_days' : numOfDays}
+    # Definition:
+    # The length of a milestone is one month. It is a multiple of billing period.
+    
+    startBillingDate = getStartBillingDate(hid)
+    arr_sbd = startBillingDate[0][0].split(' ')
+    arr_sbd = arr_sbd[0].split('-')
+    
+    smilestone = relativedelta(months=milestone)
+    emilestone = relativedelta(months=(milestone - 1))
+    
+    arr_stemp = start.split(' ')
+    arr_stime = arr_stemp[1].split(':')
+    sdate = datetime.datetime(int(arr_sbd[0]), int(arr_sbd[1]), int(arr_sbd[2]), int(arr_stime[0]), int(arr_stime[1]), int(arr_stime[2]))
+    sdate = sdate - smilestone
+    #start = sdate.strftime("%Y-%m-%d %H:%M:%S+00")
+    
+    arr_etemp = end.split(' ')
+    arr_etime = arr_etemp[1].split(':')
+    edate = datetime.datetime(int(arr_sbd[0]), int(arr_sbd[1]), int(arr_sbd[2]), int(arr_etime[0]), int(arr_etime[1]), int(arr_etime[2]))
+    edate = edate - emilestone
+    #end = edate.strftime("%Y-%m-%d %H:%M:%S+00")
+    
+    totalUsage = 0
+    numOfDays = 0;
+    one_day = datetime.timedelta(days=1)
+    idate = sdate
+    idelta = edate - idate
+    while idelta.days > 0:
+        iedate = datetime.datetime(idate.year, idate.month, idate.day, edate.hour, edate.minute, edate.second)
+        usage = getBytesBetween(hid,idate,iedate,timezone)
+        for idx in range(len(usage)):
+            if idx == 0:
+                # the byte usage is one hour offset-ed
+                continue
+            else:
+                totalUsage += usage[idx][1]
+        
+        idate = idate + one_day
+        idelta = edate - idate
+        numOfDays += 1
+        
+    return {'total_usage' : totalUsage, 'num_of_days' : numOfDays}
 
 def getShiftableDomain():
-	shiftable = ['akamai.net',
-				 'amazonaws.com',
-				 'llnwd.net']
-	return shiftable
-	
+    shiftable = ['akamai.net',
+                 'amazonaws.com',
+                 'llnwd.net']
+    return shiftable
+    
 def getShiftableUsage(nodeid,date,timezone):
     #Shiftable domains
-	shiftable = getShiftableDomain();
-	res = getDomainUsageOnDay(nodeid,-1,date,timezone)
+    shiftable = getShiftableDomain();
+    res = getDomainUsageOnDay(nodeid,-1,date,timezone)
     
-	out = {}
-	out['shiftable'] = []
-	out['nonshiftable'] = []
+    out = {}
+    out['shiftable'] = []
+    out['nonshiftable'] = []
     
-	arr_date = date.split('-')
-	idate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), 0, 0, 0)
-	delta = datetime.timedelta(hours=timezone)
-	idate = idate - delta
-	one_hour = datetime.timedelta(hours=1)
-	for x in xrange(24):
-		sdate = idate.strftime("%Y-%m-%d %H:%M:%S")
-		rec = res.get(sdate)
+    arr_date = date.split('-')
+    idate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), 0, 0, 0)
+    delta = datetime.timedelta(hours=timezone)
+    idate = idate - delta
+    one_hour = datetime.timedelta(hours=1)
+    for x in xrange(24):
+        sdate = idate.strftime("%Y-%m-%d %H:%M:%S")
+        rec = res.get(sdate)
         
-		shiftable_usage = 0
-		non_shiftable_usage = 0
-		if rec != None:
-			for entry in rec:
-				domain = entry[0]
-				if domain in shiftable:
-					shiftable_usage += entry[1]
-				else:
-					non_shiftable_usage += entry[1]
+        shiftable_usage = 0
+        non_shiftable_usage = 0
+        if rec != None:
+            for entry in rec:
+                domain = entry[0]
+                if domain in shiftable:
+                    shiftable_usage += entry[1]
+                else:
+                    non_shiftable_usage += entry[1]
 
-		out['shiftable'].append([sdate, shiftable_usage])
-		out['nonshiftable'].append([sdate, non_shiftable_usage])
-		idate = idate + one_hour
-	return out
+        out['shiftable'].append([sdate, shiftable_usage])
+        out['nonshiftable'].append([sdate, non_shiftable_usage])
+        idate = idate + one_hour
+    return out
 
 def getShiftableUsageComparison(nodeid,date,timezone):
-	# x-axis is local time
-	# y-axis is traffic volume
-	# each plot has two lines, with one point per hour:
-	# 	total whitelisted traffic (Label: "All Traffic")
-	#	total whitelisted shiftable traffic (Label: "Shiftable Traffic")
-	
+    # x-axis is local time
+    # y-axis is traffic volume
+    # each plot has two lines, with one point per hour:
+    #     total whitelisted traffic (Label: "All Traffic")
+    #    total whitelisted shiftable traffic (Label: "Shiftable Traffic")
+    
     #Shiftable domains
-	shiftable = getShiftableDomain();
-	domain_usage = getDomainUsageOnDay(nodeid,-1,date,timezone)
+    shiftable = getShiftableDomain();
+    domain_usage = getDomainUsageOnDay(nodeid,-1,date,timezone)
     
-	out = {}
-	out['All Traffic'] = []
-	out['Shiftable Traffic'] = []
+    out = {}
+    out['All Traffic'] = []
+    out['Shiftable Traffic'] = []
     
-	arr_date = date.split('-')
-	idate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), 0, 0, 0)
-	delta = datetime.timedelta(hours=timezone)
-	idate = idate - delta
-	one_hour = datetime.timedelta(hours=1)
-	for x in xrange(24):
-		sdate = idate.strftime("%Y-%m-%d %H:%M:%S")
-		rec = domain_usage.get(sdate)
+    arr_date = date.split('-')
+    idate = datetime.datetime(int(arr_date[0]), int(arr_date[1]), int(arr_date[2]), 0, 0, 0)
+    delta = datetime.timedelta(hours=timezone)
+    idate = idate - delta
+    one_hour = datetime.timedelta(hours=1)
+    for x in xrange(24):
+        sdate = idate.strftime("%Y-%m-%d %H:%M:%S")
+        rec = domain_usage.get(sdate)
         
-		all_traffic = 0
-		shiftable_traffic = 0
-		if rec != None:
-			for entry in rec:
-				domain = entry[0]
-				if domain != None:					
-					if domain in shiftable:
-						shiftable_traffic += entry[1]
-					all_traffic += entry[1]
+        all_traffic = 0
+        shiftable_traffic = 0
+        if rec != None:
+            for entry in rec:
+                domain = entry[0]
+                if domain != None:                    
+                    if domain in shiftable:
+                        shiftable_traffic += entry[1]
+                    all_traffic += entry[1]
 
-		out['All Traffic'].append([sdate, all_traffic])
-		out['Shiftable Traffic'].append([sdate, shiftable_traffic])
-		idate = idate + one_hour
-	return out	
+        out['All Traffic'].append([sdate, all_traffic])
+        out['Shiftable Traffic'].append([sdate, shiftable_traffic])
+        idate = idate + one_hour
+    return out    
