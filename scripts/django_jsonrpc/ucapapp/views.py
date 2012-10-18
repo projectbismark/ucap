@@ -1078,7 +1078,10 @@ def _getUnitstoDisable(unittype):
   tab = capTables[unittype]
   cmd = "select digest from %s where capped is True and cap <= usage"%(tab)
   res = sql.run_data_cmd(cmd,prnt=1)
+
   arr = []
+  if len(res) == 0:
+    return [1,arr]
   try:
     if res[0] == 0:
       return [0,'ERROR']
@@ -1532,7 +1535,10 @@ def getTimezone(hid):
     cmd = "select h.id, h.tzone from %s as h where h.digest = '%s'"%(tab,digest)
     res = sql.run_data_cmd(cmd)
     try:
-        return [1,(res[0][0], res[0][1])]
+        if res[0][1] is None:
+            return [1,(res[0][0], 0)]
+        else:
+            return [1,(res[0][0], res[0][1])]
     except:
         return [0,('ERROR: No match found')]
 
