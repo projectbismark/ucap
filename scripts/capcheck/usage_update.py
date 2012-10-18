@@ -216,17 +216,17 @@ def process_existing(conn, cursor):
                     if r_check == -1: # Connection error when executing database command.
                         conn = reconnect_to_database();
                         cursor = conn.cursor()
-                        return 
+                        return -1
 
                     # None, or something error than connection error..
                     elif r_check == -2:
                         try:
                             conn.rollback()
+                            break
                         except Exception:
                             conn = reconnect_to_database();
                             cursor = conn.cursor()
-                        finally:
-                            break
+                            return -1
                     else: # Execution success. Now try to commit changes.
                         try:
                             conn.commit()
@@ -238,7 +238,9 @@ def process_existing(conn, cursor):
                             print "Commit error:" + str(err)
                             conn = reconnect_to_database();
                             cursor = conn.cursor()
-                            return
+                            return -1
+
+    return 0                            
 
 ### main ###
 def main():
@@ -280,6 +282,7 @@ def main():
             print 'Created:', event.pathname
             self.conn = conn
             self.cursor = cursor
+            result = 0
 
             # Get household id.
             hid_time_seq = event.pathname.split('-')
@@ -318,7 +321,14 @@ def main():
 #                        self.cursor = self.conn.cursor()
 #
             print "Start processing existing stuff again"
-            process_existing(self.conn,self.cursor)
+            result = process_existing(self.conn,self.cursor)
+            
+            # Error with connection
+            if result == -1:
+              self.conn = reconnect_to_database();
+              self.cursor = self.conn.cursor()
+
+                
 
     handler = EventHandler()
     notifier = pyinotify.Notifier(wm, handler)
