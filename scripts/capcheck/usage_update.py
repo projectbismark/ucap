@@ -211,6 +211,25 @@ def process_existing(conn, cursor):
                     hid_str = hid_time_seq[-1]
                     tmp_lst = hid_str.split('-')
                     hid_str = tmp_lst[0]
+                    
+                    # Check hid in database
+                    cmd_1 = "SELECT digest from households where id = '%s'"%(hid_str)
+                    try: 
+                        cursor.execute(cmd_1)
+                        res_tpl_1 = cursor.fetchone()
+                        if res_tpl_1 is None: # router does not exist in the database
+                          print 'Oh. that HID does not exist in database: %s'%(hid_str)
+                          break
+
+                    except Exception as err:
+                        sys.stderr.write('ERROR: %s\n' % str(err))
+                        print 'Failed in database command sequence: '+str(err.pgcode)
+                        if err.pgcode is not None:
+                            if err.pgcode[:2] == '08': # Connection exception
+                                time.sleep(1)
+                                return -1
+                        else:
+                            return -2
 
                     r_check = process_file(CHECK_DIR+'/'+dirc+'/'+files, cursor, hid_str)
                     if r_check == -1: # Connection error when executing database command.
