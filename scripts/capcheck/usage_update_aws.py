@@ -84,6 +84,15 @@ def move_file_after_success(filename):
     shutil.move(filename,MOVE_DIR+'/'+filename.lstrip(CHECK_DIR))
 ### 
 
+### 
+def delete_file_after_success(filename):
+    # delete file when done with processing
+    try: 
+        os.remove(filename)
+    except:
+        print 'Failed to remove file. Ignore.'
+### 
+
 
 def reconnect_to_database():
     while (1):
@@ -118,7 +127,7 @@ def reconnect_to_database():
 ###################################
 
 ### process ###
-def process_file(filename, cursor, hid_str):
+def process_file(filename, conn, cursor, hid_str):
     # File open
     lines_lst = []
     digest_str = ''
@@ -164,9 +173,8 @@ def process_file(filename, cursor, hid_str):
                         if not digest_str=='':
                             cmd = "UPDATE device_caps_curr set usage=%s where digest='%s'" %(usage_str,digest_str)
                             cursor.execute(cmd)
-                            print 'Usage Updated'
-#                    except:
-                    except Exception as err:
+#                            print 'Usage Updated'
+                    ex-1pt Exception as err:
                         sys.stderr.write('ERROR: %s\n' % str(err))
                         print 'Failed in database command sequence: '+str(err.pgcode)
                         if err.pgcode is not None:
@@ -176,12 +184,22 @@ def process_file(filename, cursor, hid_str):
                         else:
                             return -2
 
-#        # Move file when done with processing
-#        tmp_lst = (os.path.dirname(filename)).split('/')
-#        if os.path.exists(MOVE_DIR+'/'+tmp_lst[-1])==False:
-#            os.mkdir(MOVE_DIR+'/'+tmp_lst[-1])
-#        shutil.move(filename,MOVE_DIR+'/'+filename.lstrip(CHECK_DIR))
-##        shutil.copy(filename,MOVE_DIR+'/'+filename.lstrip(CHECK_DIR))
+                    # Execution succeeded. Try to commit. 
+                    try:
+                        conn.commit()
+                        # success!! now, delete the file.
+                        delete_file_after_success(filename)
+
+                    except Exception as err:
+                        print "commit error:" + str(err)
+
+                        try: 
+                           conn.rollback()
+
+                        except Exception as err2:
+                            print 'Failed to rollback as well..'
+
+                        return -3
 
     else:
         print 'Wrong format'
@@ -196,69 +214,45 @@ def process_existing(conn, cursor):
     # Sweep the Check directorty, and process any existing files first.
     dir_lst = os.listdir(CHECK_DIR)
     for dirc in dir_lst:
-        if dirc!='OWC43DC7B0AE63' and dirc!='OWC43DC7A37C0D':
-            if os.path.isdir(CHECK_DIR+'/'+dirc):
-                tmp_lst = (CHECK_DIR+'/'+dirc).split('/')
-                # if new directory, make it on moved_dir.
-                if os.path.exists(MOVE_DIR+'/'+tmp_lst[-1])==False:
-                    os.mkdir(MOVE_DIR+'/'+tmp_lst[-1])
-                file_lst = os.listdir(CHECK_DIR+'/'+dirc)
-                for files in file_lst:
-                    file_name_str = CHECK_DIR+'/'+dirc+'/'+files
-                    hid_time_seq = file_name_str.split('-')
-                    hid_time_seq = file_name_str.split('/')
-                    hid_str = hid_time_seq[-1]
-                    tmp_lst = hid_str.split('-')
-                    hid_str = tmp_lst[0]
-                    
-                    # Check hid in database
-                    cmd_1 = "SELECT digest from households where id = '%s'"%(hid_str)
-                    try: 
-                        cursor.execute(cmd_1)
-                        res_tpl_1 = cursor.fetchone()
-                        if res_tpl_1 is None: # router does not exist in the database
-                          print 'Oh. that HID does not exist in database: %s'%(hid_str)
-                          break
+        if os.path.isdir(CHECK_DIR+'/'+dirc):
+            tmp_lst = (CHECK_DIR+'/'+dirc).split('/')
+            file_lst = os.listdir(CHECK_DIR+'/'+dirc)
+            for files in file_lst:
+                file_name_str = CHECK_DIR+'/'+dirc+'/'+files
+                hid_time_seq = file_name_str.split('-')
+                hid_time_seq = file_name_str.split('/')
+                hid_str = hid_time_seq[-1]
+                tmp_lst = hid_str.split('-')
+                hid_str = tmp_lst[0]
+                
+                # Check hid in database
+                cmd_1 = "SELECT digest from households where id = '%s'"%(hid_str)
+                try: 
+                    cursor.execute(cmd_1)
+                    res_tpl_1 = cursor.fetchone()
+                    if res_tpl_1 is None: # router does not exist in the database
+                      print 'Oh. that HID does not exist in database: %s'%(hid_str)
+                      break
 
-                    except Exception as err:
-                        sys.stderr.write('ERROR: %s\n' % str(err))
-                        print 'Failed in database command sequence: '+str(err.pgcode)
-                        if err.pgcode is not None:
-                            if err.pgcode[:2] == '08': # Connection exception
-                                time.sleep(1)
-                                return -1
+                except Exception as err:
+                    sys.stderr.write('ERROR: %s\n' % str(err))
+                    print 'Failed in database command sequence: '+str(err.pgcode)
+                    if err.pgcode is not None:
+                        if err.pgcode[:2] == '08': # Connection exception
+                            time.sleep(1)
+                            return -1
                         else:
-                            return -2
-
-                    r_check = process_file(CHECK_DIR+'/'+dirc+'/'+files, cursor, hid_str)
-                    if r_check == -1: # Connection error when executing database command.
-                        conn = reconnect_to_database();
-                        cursor = conn.cursor()
-                        return -1
-
-                    # None, or something error than connection error..
-                    elif r_check == -2:
-                        try:
-                            conn.rollback()
                             break
-                        except Exception:
-                            conn = reconnect_to_database();
-                            cursor = conn.cursor()
-                            return -1
-                    else: # Execution success. Now try to commit changes.
-                        try:
-                            conn.commit()
-                            # Success!! Now, move the file.
-                            ffname = CHECK_DIR+'/'+dirc+'/'+files
-                            move_file_after_success(ffname)
-    
-                        except Exception as err:
-                            print "Commit error:" + str(err)
-                            conn = reconnect_to_database();
-                            cursor = conn.cursor()
-                            return -1
+                    else:
+                        break
 
-    return 0                            
+                # attempt to process file.
+                r_check = process_file(check_dir+'/'+dirc+'/'+files, conn, cursor, hid_str)
+
+                if r_check != 0:
+                    return r_check
+                    
+    return 0
 
 ### main ###
 def main():
@@ -292,7 +286,12 @@ def main():
     wm = pyinotify.WatchManager()
     mask = pyinotify.IN_CREATE
 
+    #### Start of class ####
     class EventHandler(pyinotify.ProcessEvent):
+        last_checktime = 0
+        def __init__(self):
+            EventHandler.last_checktime = time.time()
+
         def process_IN_CREATE(self,event):
             print 'Created:', event.pathname
             self.conn = conn
@@ -306,25 +305,31 @@ def main():
             tmp_lst = hid_str.split('-')
             hid_str = tmp_lst[0]
 
-            # if new directory, make it on moved_dir, and pass.
+            # Process only files. Ignore directory creation for now.
             if os.path.isdir(event.pathname):
-               tmp_lst = (event.pathname).split('/')
-               if os.path.exists(MOVE_DIR+'/'+tmp_lst[-1])==False:
-                 os.mkdir(MOVE_DIR+'/'+tmp_lst[-1])
+                print 'New router added.'
+            else:
+                result = process_file(event.pathname, self.conn, self.cursor, hid_str)
 
-            print tmp_lst[-1]
-            if tmp_lst[-1] == 'OWC43DC7A37C0D':
-                return
-
-            print "Start processing existing stuff again"
-            result = process_existing(self.conn,self.cursor)
-            
             # Error with connection
             if result == -1:
-              self.conn = reconnect_to_database();
-              self.cursor = self.conn.cursor()
+                self.conn = reconnect_to_database();
+                self.cursor = self.conn.cursor()
 
-                
+            # Sweep through directories again in 10 seconds.
+            nowtime = time.time()
+            if (nowtime - EventHandler.last_checktime) > 10.0:
+                print "Start processing existing stuff again"
+                result = process_existing(self.conn,self.cursor)
+
+                # Error with connection
+                if result < 0:
+                    self.conn = reconnect_to_database();
+                    self.cursor = self.conn.cursor()
+                elif result == 0:
+                    EventHandler.last_checktime = nowtime
+
+    #### End of class ####
 
     handler = EventHandler()
     notifier = pyinotify.Notifier(wm, handler)
