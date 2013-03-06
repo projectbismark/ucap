@@ -20,13 +20,9 @@ import string
 import pyinotify
 import psycopg2
 
-#CHECK_DIR = '/data/users/bismark/data/http_uploads/passive-frequent'
-MOVE_DIR = '/data2/users/hyojoon/bismark/usage_data_moved'
-LOCAL_DB_PORT = 54322
-
-#CHECK_DIR = '/home/hyojoon/Work/ucap/code/ucap/scripts/capcheck/data/OW2CB05D82F41A/20130306/test'
-CHECK_DIR = '/home/hyojoon/Work/ucap/code/ucap/scripts/capcheck/data/OW2CB05D82F41A/20130306/empty'
-
+CHECK_DIR = 'SOMETHING'
+MOVE_DIR = 'SOMETHING1'
+LOCAL_DB_PORT = '1'
 
 ####
 HASHED_GW_POS = 2
@@ -94,8 +90,16 @@ def delete_file_after_success(filename):
     try: 
         os.remove(filename)
         pass
-    except:
+    except Exception as err:
         print 'Failed to remove file. Ignore.'
+        if err.errno == 2:
+            print 'Remove file error. Not existing: ' + str(err.errno)
+            print 'Filename: ' + str(filename)
+            sys.exit(1) 
+        else:
+            print 'Remove file error: ' + str(err.errno)
+            sys.exit(1) 
+
 ### 
 
 
@@ -192,8 +196,6 @@ def process_file(filename, conn, cursor, hid_str):
                     # Execution succeeded. Try to commit. 
                     try:
                         conn.commit()
-                        # success!! now, delete the file.
-                        delete_file_after_success(filename)
 
                     except Exception as err:
                         print "commit error:" + str(err)
@@ -205,6 +207,9 @@ def process_file(filename, conn, cursor, hid_str):
                             print 'Failed to rollback as well..'
 
                         return -3
+
+        # success!! now, delete the file.
+        delete_file_after_success(filename)
 
     else:
         print 'Wrong format'
@@ -252,7 +257,7 @@ def process_existing(conn, cursor):
                         break
 
                 # attempt to process file.
-                r_check = process_file(check_dir+'/'+dirc+'/'+files, conn, cursor, hid_str)
+                r_check = process_file(CHECK_DIR+'/'+dirc+'/'+files, conn, cursor, hid_str)
 
                 if r_check != 0:
                     return r_check
