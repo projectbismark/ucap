@@ -20,9 +20,13 @@ import string
 import pyinotify
 import psycopg2
 
-CHECK_DIR = '/data/users/bismark/data/http_uploads/passive-frequent'
+#CHECK_DIR = '/data/users/bismark/data/http_uploads/passive-frequent'
 MOVE_DIR = '/data2/users/hyojoon/bismark/usage_data_moved'
 LOCAL_DB_PORT = 54322
+
+#CHECK_DIR = '/home/hyojoon/Work/ucap/code/ucap/scripts/capcheck/data/OW2CB05D82F41A/20130306/test'
+CHECK_DIR = '/home/hyojoon/Work/ucap/code/ucap/scripts/capcheck/data/OW2CB05D82F41A/20130306/empty'
+
 
 ####
 HASHED_GW_POS = 2
@@ -89,6 +93,7 @@ def delete_file_after_success(filename):
     # delete file when done with processing
     try: 
         os.remove(filename)
+        pass
     except:
         print 'Failed to remove file. Ignore.'
 ### 
@@ -155,7 +160,7 @@ def process_file(filename, conn, cursor, hid_str):
                 usage_str = mac_usage_lst[1].rstrip('/\n')
 
                 if not mac_str==hashed_gw_mc_str: # Don't insert if the mac is the gateway itself
-                    print hid_str,mac_str,usage_str
+#                    print hid_str,mac_str,usage_str
                     try:
                         cmd = "SELECT devices.digest from devices,households where devices.macid='{%s}' and households.id='%s'"%(mac_str,hid_str)
                         cursor.execute(cmd)
@@ -169,12 +174,12 @@ def process_file(filename, conn, cursor, hid_str):
 
                             cursor.execute(cmd)
                             digest_str = get_digest(cursor,hid_str,'default',mac_str)
-                            print 'New Device Added'
+#                            print 'New Device Added'
                         if not digest_str=='':
                             cmd = "UPDATE device_caps_curr set usage=%s where digest='%s'" %(usage_str,digest_str)
                             cursor.execute(cmd)
 #                            print 'Usage Updated'
-                    ex-1pt Exception as err:
+                    except Exception as err:
                         sys.stderr.write('ERROR: %s\n' % str(err))
                         print 'Failed in database command sequence: '+str(err.pgcode)
                         if err.pgcode is not None:
@@ -231,7 +236,7 @@ def process_existing(conn, cursor):
                     cursor.execute(cmd_1)
                     res_tpl_1 = cursor.fetchone()
                     if res_tpl_1 is None: # router does not exist in the database
-                      print 'Oh. that HID does not exist in database: %s'%(hid_str)
+#                      print 'Oh. that HID does not exist in database: %s'%(hid_str)
                       break
 
                 except Exception as err:
@@ -268,6 +273,7 @@ def main():
     #    sql_user_test = get_config(TEST, 'sql_user').strip()
     #    sql_passwd_test = get_config(TEST, 'sql_passwd').strip()
     #    sql_db_test = get_config(TEST, 'sql_db').strip()
+        
         try:
             conn = psycopg2.connect(database=sql_db, host=sql_host, user=sql_user, password=sql_passwd, port=LOCAL_DB_PORT)
             print 'CONNECTED!!'
@@ -280,7 +286,7 @@ def main():
 
     # process existing files
     process_existing(conn,cursor)
-    print 'Done with Existing Files!'
+#    print 'Done with Existing Files!'
 
     # Pyinotify
     wm = pyinotify.WatchManager()
@@ -293,7 +299,7 @@ def main():
             EventHandler.last_checktime = time.time()
 
         def process_IN_CREATE(self,event):
-            print 'Created:', event.pathname
+#            print 'Created:', event.pathname
             self.conn = conn
             self.cursor = cursor
             result = 0
