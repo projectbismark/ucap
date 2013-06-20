@@ -16,10 +16,9 @@ import shlex, subprocess
 import shutil
 import socket
 import string
-import pyinotify
 import psycopg2
 
-LOCAL_DB_PORT = 54322
+LOCAL_DB_PORT = 54323
 
 ## Deployment and test database
 DEPLOY = 1
@@ -252,6 +251,55 @@ def process_existing(conn, cursor):
 
     return 0                            
 
+""" call log analysis """
+def call_log_analysis(cursor):
+  
+  cmd = "SELECT * FROM function_call_log"
+  cursor.execute(cmd)
+  tuples_lst = cursor.fetchall()
+
+  callers_map = {}
+  functions_map = {}
+  cf_combination_map = {}
+
+  for t in tuples_lst:
+    caller_router = t[0]
+    function_name = t[1]
+    params = t[2]
+    time = t[3]
+
+    # callers
+    if callers_map.has_key(caller_router):
+      callers_map[caller_router] = callers_map[caller_router] + 1
+    else:
+      callers_map[caller_router] = 1
+ 
+    # functions  
+    if functions_map.has_key(function_name):
+      functions_map[function_name] = functions_map[function_name] + 1
+    else:
+      functions_map[function_name] = 1
+ 
+    # combination
+    if cf_combination_map.has_key((caller_router,function_name)):
+      cf_combination_map[(caller_router,function_name)] = cf_combination_map[(caller_router,function_name)] + 1
+    else:
+      cf_combination_map[(caller_router,function_name)] = 1
+ 
+  nums_of_logs = len(tuples_lst)
+  print nums_of_logs
+  print len(callers_map)
+  print len(functions_map)
+
+  return tuples_lst,callers_map,functions_map,cf_combination_map
+
+
+""" analze """
+def analyze_data(tuples_lst, c_map, f_map, cf_map):
+
+  pass
+
+    
 ### main ###
 def main():
 
@@ -271,6 +319,10 @@ def main():
             time.sleep(5)
             continue
     cursor = conn.cursor()
+  
+    tuples_lst, callers_map, functions_map, cf_combination_map = call_log_analysis(cursor)
+
+    analyze_data(tuples_lst, callers_map, functions_map, cf_combination_map)
 
 ###
 if __name__ ==  '__main__':
