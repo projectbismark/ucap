@@ -17,6 +17,7 @@ import shutil
 import socket
 import string
 import psycopg2
+import pickle
 
 LOCAL_DB_PORT = 54323
 
@@ -295,9 +296,23 @@ def call_log_analysis(cursor):
 
 
 """ analze """
-def analyze_data(tuples_lst, c_map, f_map, cf_map):
+def save_data(tuples_lst, c_map, f_map, cf_map):
 
-  pass
+  fp = open('./tuples_lst.p', 'wb')
+  pickle.dump(tuples_lst, fp)
+  fp.close()
+
+  fp = open('./callers_map.p', 'wb')
+  pickle.dump(c_map, fp)
+  fp.close()
+
+  fp = open('./functions_map.p', 'wb')
+  pickle.dump(f_map, fp)
+  fp.close()
+
+  fp = open('./combination_map.p', 'wb')
+  pickle.dump(cf_map, fp)
+  fp.close()
 
     
 ### main ###
@@ -322,7 +337,7 @@ def main():
   
     tuples_lst, callers_map, functions_map, cf_combination_map = call_log_analysis(cursor)
 
-    analyze_data(tuples_lst, callers_map, functions_map, cf_combination_map)
+    save_data(tuples_lst, callers_map, functions_map, cf_combination_map)
 
 ###
 if __name__ ==  '__main__':
