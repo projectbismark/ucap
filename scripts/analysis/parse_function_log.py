@@ -132,21 +132,21 @@ def call_log_analysis(cursor):
 
 
 """ analyze """
-def save_data(tuples_lst, c_map, f_map, cf_map):
+def save_data(tuples_lst, c_map, f_map, cf_map, output_dir):
 
-  fp = open('./tuples_lst.p', 'wb')
+  fp = open(output_dir + 'tuples_lst.p', 'wb')
   pickle.dump(tuples_lst, fp)
   fp.close()
 
-  fp = open('./callers_map.p', 'wb')
+  fp = open(output_dir + 'callers_map.p', 'wb')
   pickle.dump(c_map, fp)
   fp.close()
 
-  fp = open('./functions_map.p', 'wb')
+  fp = open(output_dir + 'functions_map.p', 'wb')
   pickle.dump(f_map, fp)
   fp.close()
 
-  fp = open('./combination_map.p', 'wb')
+  fp = open(output_dir + 'combination_map.p', 'wb')
   pickle.dump(cf_map, fp)
   fp.close()
 
@@ -176,9 +176,38 @@ def main():
       time.sleep(5)
       continue
 
+  ## Options
+  desc = ( 'Parse ucap UI call log. Make pickled data' )
+  usage = ( '%prog [options]\n'
+            '(type %prog -h for details)' )
+  op = OptionParser( description=desc, usage=usage )
+  op.add_option( '--output', '-o', action="store", \
+                 dest="output", help = "Output directory for pickled data" )
+
+  ## Check option     
+  options, args = op.parse_args()
+  if options.output is None:
+    print 'Wrong number of arguments. exit'
+    return
+    
+  ## attach / if not there    
+  output_dir = options.output
+  if output_dir.endswith('/') is False:
+    output_dir = output_dir + '/'
+
+  ## Check access
+  if os.access(output_dir, os.R_OK) is False:
+    print 'Cannot access output dir. Maybe does not exist? Exit.'
+    return
+
+  ## Connect
   cursor = conn.cursor()
+
+  ## Start fetch, store.
   tuples_lst, callers_map, functions_map, cf_combination_map = call_log_analysis(cursor)
-  save_data(tuples_lst, callers_map, functions_map, cf_combination_map)
+
+  ## Save as pickled data.
+  save_data(tuples_lst, callers_map, functions_map, cf_combination_map, output_dir)
 
 ###
 if __name__ ==  '__main__':

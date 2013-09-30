@@ -1,13 +1,51 @@
+######################################################
+# Georgia Institute of Technology
+# author: Hyojoon Kim
+# date: 2013.6.20
+
+# name: analysis_and_plots.py
+# desc: Python script for analyzing and plotting
+#
+######################################################
 
 import pickle
-import sys
-
-import matplotlib as mpl
-mpl.use('Agg')
-import matplotlib.pyplot as plt
-from numpy.random import normal
-import pylab
 import numpy as np
+import operator
+import string
+import pickle
+import sys
+import re
+import time
+import os
+import sqlite3 as db
+import shlex, subprocess
+import hashlib
+import xml.etree.ElementTree as ET
+from multiprocessing import Process
+from multiprocessing import Pool
+from collections import namedtuple
+from datetime import datetime
+import tarfile
+import matplotlib as mpl
+mpl.use('PS')
+import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator
+from numpy.random import normal
+import numpy as np
+import pytz
+from optparse import OptionParser
+import dpkt
+from matplotlib.patches import ConnectionPatch
+import struct
+from socket import *
+
+mpl.rc('text', usetex=True)
+mpl.rc('font', **{'family':'serif', 'sans-serif': ['Times'], 'size': 9})
+mpl.rc('figure', figsize=(3.33, 2.06))
+mpl.rc('axes', linewidth=0.5)
+mpl.rc('patch', linewidth=0.5)
+mpl.rc('lines', linewidth=0.5)
+mpl.rc('grid', linewidth=0.25)
 
 
 sa_list = []
@@ -29,9 +67,42 @@ def create_figure(title, xlabel, ylabel):
   return plt
 
 
+
+
+
+
+
+
+
+def lastlog_time(t_lst, c_map, f_map, cf_map):
+#####
+# Table "public.function_call_log"
+#    Column   |            Type             | Modifiers
+# ------------+-----------------------------+-----------
+#  caller     | id_t                        |
+#  name       | fname_t                     |
+#  parameters | fparam_t                    |
+#  calltime   | timestamp without time zone (2013-04-02 19:01:34) |
+#####
+  timestamp_to_routers_map = {}
+
+  for t in t_lst:
+#    ts_str = t[3]
+#    ts = datetime.strptime(ts_str, "%Y-%M-d %H:%M:%S")
+       
+    ts_str = t[3]
+    date_int = int(ts_str[:11].strip('-'))
+    if timestamp_to_routers_map.has_key(date_int) is True:
+      timestamp_to_routers_map[date_int].append(t[0])
+    else:
+      timestamp_to_routers_map[date_int] = [t[0],]
+
+  tkeys = sorted(timestamp_to_routers_map.keys())
+  for t in tkeys:
+    print t
+    print timestamp_to_routers_mapt[t]
+
 def plot_work(t_lst, c_map, f_map, cf_map, output):
-
-
   callers = []
   functions = []
 
@@ -173,21 +244,21 @@ def plot_work(t_lst, c_map, f_map, cf_map, output):
   plt.savefig('./usa.eps')
 
 
-def load_pickled_data():
+def load_pickled_data(input_dir):
   t_lst = []
-#  pfile = open('./tuples_lst.p', 'rb')
-#  t_lst = pickle.load(pfile)
-#  pfile.close()
+  pfile = open(input_dir + 'tuples_lst.p', 'rb')
+  t_lst = pickle.load(pfile)
+  pfile.close()
 
-  pfile = open('./callers_map.p', 'rb')
+  pfile = open(input_dir + 'callers_map.p', 'rb')
   c_map = pickle.load(pfile)
   pfile.close()
 
-  pfile = open('./functions_map.p', 'rb')
+  pfile = open(input_dir + 'functions_map.p', 'rb')
   f_map = pickle.load(pfile)
   pfile.close()
 
-  pfile = open('./combination_map.p', 'rb')
+  pfile = open(input_dir + 'combination_map.p', 'rb')
   cf_map = pickle.load(pfile)
   pfile.close()
 
@@ -197,25 +268,57 @@ def load_pickled_data():
 ### main ###
 def main():
 
-  args = sys.argv[1:]
-  if len(args) is not 1:
-    print '\n##############################################################'
-    print 'usage: python  analysis_and_plots.py <output dir>'
-    print '###############################################################\n'
-    sys.exit(1)
+  desc = ( 'Plot figures for ucap evalutaion' )
+  usage = ( '%prog [options]\n'
+            '(type %prog -h for details)' )
+  op = OptionParser( description=desc, usage=usage )
 
-  output_dir = args[0]
+  ### Options
+  op.add_option( '--input', '-i', action="store", \
+                 dest="input", help = "Input directory that has data." )
+  op.add_option( '--output', '-o', action="store", \
+                 dest="output", help = "Output directory for figures" )
 
-  # route id list
-  global sa_list
-  fd = open('./sa_routers.list','r')
-  sa_list = fd.readlines()
-  fd.close()
+  ### Check option     
+  options, args = op.parse_args()
+  if options.input is None or options.output is None:
+    print 'Wrong number of arguments. exit'
+    return
+    
+  ### Attach / if not there    
+  input_dir = options.input
+  output_dir = options.output
+  if input_dir.endswith('/') is False:
+    input_dir = input_dir + '/'
+  output_dir = options.output
+  if output_dir.endswith('/') is False:
+    output_dir = output_dir + '/'
 
-  print sa_list
+  # Check access
+  if os.access(input_dir, os.R_OK) is False:
+    print 'Cannot access input dir. Exit.'
+    return
+  if os.access(output_dir, os.R_OK) is False:
+    print 'Cannot access output dir. Exit.'
+    return
 
-  t_lst, c_map, f_map, cf_map = load_pickled_data()
-  plot_work(t_lst, c_map, f_map, cf_map, output_dir)
+#  # route id list
+#  global sa_list
+#  fd = open('./sa_routers.list','r')
+#  sa_list = fd.readlines()
+#  fd.close()
+#
+#  print sa_list
+#
+
+  ### Load pickled data
+  t_lst, c_map, f_map, cf_map = load_pickled_data(input_dir)
+
+  ### Analyze
+  lastlog_time(t_lst, c_map, f_map, cf_map)
+
+  ### Plot
+#  plot_work(t_lst, c_map, f_map, cf_map, output_dir)
 
 
 
