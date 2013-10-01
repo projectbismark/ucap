@@ -41,12 +41,15 @@ from socket import *
 
 mpl.rc('text', usetex=True)
 mpl.rc('font', **{'family':'serif', 'sans-serif': ['Times'], 'size': 9})
-mpl.rc('figure', figsize=(3.33, 2.06))
+mpl.rc('figure', figsize=(3.33, 7.06))
 mpl.rc('axes', linewidth=0.5)
 mpl.rc('patch', linewidth=0.5)
 mpl.rc('lines', linewidth=0.5)
 mpl.rc('grid', linewidth=0.25)
 
+
+
+ACTIVE_INTERVAL = 60 # in days
 
 sa_list = []
 
@@ -67,14 +70,7 @@ def create_figure(title, xlabel, ylabel):
   return plt
 
 
-
-
-
-
-
-
-
-def lastlog_time(t_lst, c_map, f_map, cf_map):
+def make_lastlog_time(t_lst, input_dir):
 #####
 # Table "public.function_call_log"
 #    Column   |            Type             | Modifiers
@@ -84,23 +80,28 @@ def lastlog_time(t_lst, c_map, f_map, cf_map):
 #  parameters | fparam_t                    |
 #  calltime   | timestamp without time zone (2013-04-02 19:01:34) |
 #####
-  timestamp_to_routers_map = {}
+
+  
+  timestamp_to_routers_map = {}  ## { Timestamp : [routerIDs,] }
 
   for t in t_lst:
-#    ts_str = t[3]
-#    ts = datetime.strptime(ts_str, "%Y-%M-d %H:%M:%S")
-       
-    ts_str = t[3]
-    date_int = int(ts_str[:11].strip('-'))
+    ts_str =  str(t[3])
+    router_str = str(t[0])
+    date_int = int(ts_str[:10].replace('-',''))
     if timestamp_to_routers_map.has_key(date_int) is True:
-      timestamp_to_routers_map[date_int].append(t[0])
+      if timestamp_to_routers_map[date_int].count(router_str) == 0:
+        timestamp_to_routers_map[date_int].append(router_str)
+      else:
+        pass
     else:
-      timestamp_to_routers_map[date_int] = [t[0],]
+      timestamp_to_routers_map[date_int] = [router_str,]
 
   tkeys = sorted(timestamp_to_routers_map.keys())
-  for t in tkeys:
-    print t
-    print timestamp_to_routers_mapt[t]
+
+  # Save
+  fp = open(input_dir + 'timestamp_map.p', 'wb')
+  pickle.dump(timestamp_to_routers_map, fp)
+  fp.close()
 
 def plot_work(t_lst, c_map, f_map, cf_map, output):
   callers = []
@@ -265,6 +266,111 @@ def load_pickled_data(input_dir):
   return t_lst, c_map, f_map, cf_map
 
 
+def time_analyize(p_data, output_dir):
+
+  # Unique routers
+  router_to_times_map = {} 
+
+  # Get pickled data
+  fd = open(p_data, 'rb')
+  t_map = pickle.load(fd)
+  fd.close()
+
+  ## Sort
+  tkeys = sorted(t_map.keys())
+
+  for k in tkeys:
+    router_lst = t_map[k]
+    for r in router_lst:
+      if router_to_times_map.has_key(r) is True:
+        router_to_times_map[r].append(datetime.strptime(str(k), "%Y%m%d"))
+      else:
+        router_to_times_map[r] = [datetime.strptime(str(k), "%Y%m%d"),]
+
+  print 'Number of unique routers: ' + str(len(router_to_times_map))
+  active_routers_list = router_to_times_map.keys()
+  print sorted(active_routers_list)
+
+  ## Get time flow, with missing dates
+  start_t = datetime.strptime(str(tkeys[0]), "%Y%m%d")
+  end_t = datetime.strptime(str(tkeys[-1]), "%Y%m%d")
+  timeflow = [start_t,]
+  st = start_t
+  from datetime import timedelta
+  while st < end_t:
+    st = st + timedelta(days=1)
+    timeflow.append(st)
+ 
+  # active routers
+  ya = {}
+  sorted_rkeys = sorted(active_routers_list)
+  for r in sorted_rkeys:
+    t_list = router_to_times_map[r]
+    if len(t_list) < 10:
+      active_routers_list.remove(r)
+    else:
+      prev_date = t_list[0]
+      for t in t_list:
+        now_date = t
+        tdelta = now_date - prev_date
+        if tdelta.days > ACTIVE_INTERVAL:
+          if active_routers_list.count(r) != 0:
+            active_routers_list.remove(r)
+        prev_date = now_date
+
+    ya[r] = []
+    # Plot data
+    for tt in timeflow:
+      if t_list.count(tt) > 0:
+        ya[r].append(1)
+      else:
+        ya[r].append(0)
+
+  print 'Number of active users: ' + str(len(active_routers_list))
+  print sorted(active_routers_list)
+   
+
+  # Plot
+  xa = timeflow
+  colors = ['r-+','k-*','g-,','c-1','r-.']
+  pl = []
+  fig = plt.figure(dpi=700)
+  ax = fig.add_subplot(111)
+
+  for idx,r in enumerate(sorted_rkeys):
+    real_ya = [i*(idx+1) for i in ya[r]]
+#    pl.append( plt.plot(xa, [i*(idx+1) for i in ya[r]],  '%s' %(colors[idx])) )
+    pl.append( plt.plot(xa, real_ya,  'r+',markersize=5) )
+  
+  #  majorind = np.arange(10,step=1)
+  #  plt.xticks(majorind)
+  ax.xaxis.grid(True, which='major')
+  ax.yaxis.grid(True, which='major')
+#  ax.set_yscale('log')
+#  ax.set_xscale('log')
+#  plt.ylim([1.0/1000.0,1000])
+  
+  ff = plt.gcf()
+#  ax.set_ylim(0.008,0.1)
+#  ax.set_xlim(1,100)
+#
+  ymajorind = np.arange(len(sorted_rkeys)+1,step=1)
+  tmp = ['N/A',] + [i for i in sorted_rkeys]
+  plt.yticks(ymajorind,tmp, rotation=0, fontsize=6)
+
+#  ymajorind = np.arange(len(ya[sorted_rkeys[0]]),step=1)
+  plt.xticks(rotation=45)
+
+  ff.subplots_adjust(bottom=0.15)
+  ff.subplots_adjust(left=0.30)
+  plt.xlabel('Date', rotation=0)
+  plt.ylabel('Routers', rotation=90)
+#   plt.legend([p1[0],p2[0]], ['with events','without events'],  prop={'size':7})
+#  plt.legend([pl[0][0],pl[1][0],pl[2][0],pl[3][0]], ['m=1','m=50','m=1000','baseline'],  prop={'size':7}, loc='upper center')
+  plt.savefig(output_dir + 'ba.eps', dpi=700)
+
+
+
 ### main ###
 def main():
 
@@ -312,10 +418,15 @@ def main():
 #
 
   ### Load pickled data
-  t_lst, c_map, f_map, cf_map = load_pickled_data(input_dir)
+  indir = os.listdir(input_dir)
+  if indir.count('timestamp_map.p') == 0:
+    t_lst, c_map, f_map, cf_map = load_pickled_data(input_dir)
+    make_lastlog_time(t_lst, input_dir)
 
-  ### Analyze
-  lastlog_time(t_lst, c_map, f_map, cf_map)
+  # Analyze
+  time_analyize(input_dir + 'timestamp_map.p', output_dir)
+  
+
 
   ### Plot
 #  plot_work(t_lst, c_map, f_map, cf_map, output_dir)
