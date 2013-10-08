@@ -4,7 +4,7 @@ unitTables = {'household':'households','user':'users','device':'devices'}
 capTables = {'household':'household_caps_curr','user':'user_caps_curr',\
           'device':'device_caps_curr'}
 userpointsTables = {'userpoints':'userpoints','baseline':'userpoints_baseline',\
-					'points':'userpoints_points'}
+                                       'points':'userpoints_points'}
 default_user = 'default'
 
 def get_config(key):
@@ -38,4 +38,7 @@ def get_group(arr,q=""):
         s = "%s%s%s%s,"%(s,q,i,q)
     s = s[:-1]
     s = "%s)"%(s)
-    return s
+    if s == ")":
+      return "('000000000000')"
+    else:
+      return s
