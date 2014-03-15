@@ -49,6 +49,8 @@ mpl.rc('lines', linewidth=0.5)
 mpl.rc('grid', linewidth=0.25)
 
 
+focus_list = []
+
 sa_list = []
 
 def find_router_by_param(params, cursor):
