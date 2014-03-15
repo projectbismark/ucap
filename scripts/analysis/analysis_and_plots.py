@@ -34,9 +34,10 @@ from numpy.random import normal
 import numpy as np
 import pytz
 from optparse import OptionParser
-import dpkt
+#import dpkt
 from matplotlib.patches import ConnectionPatch
 import struct
+import copy
 from socket import *
 
 mpl.rc('text', usetex=True)
@@ -48,10 +49,27 @@ mpl.rc('lines', linewidth=0.5)
 mpl.rc('grid', linewidth=0.25)
 
 
-
-ACTIVE_INTERVAL = 60 # in days
-
 sa_list = []
+
+def find_router_by_param(params, cursor):
+  param_list = str(params).split(',')
+  caller_router = 'failed'
+
+  for p in param_list:
+    if p.startswith('OW') is True:    # router ID here.
+      caller_router = p
+      break
+    elif p.count('@') is True:        # possibly email address
+      cmd = "SELECT households.id from households,users where parentdigest=households.digest AND users.id='"+p+"'"
+      cursor.execute(cmd)
+      tuples_lst = cursor.fetchall()  # Table entrie in tuple format
+      if len(tuples_lst) > 0:
+        if len(tuples_lst[0]) > 0:
+          caller_router = tuples_lst[0][0]
+
+  return caller_router
+
+
 
 def is_sa_router(router_id):
   needle = router_id + '\n'
@@ -87,6 +105,9 @@ def make_lastlog_time(t_lst, input_dir):
   for t in t_lst:
     ts_str =  str(t[3])
     router_str = str(t[0])
+    if len(router_str) < 10:
+      continue
+
     date_int = int(ts_str[:10].replace('-',''))
     if timestamp_to_routers_map.has_key(date_int) is True:
       if timestamp_to_routers_map[date_int].count(router_str) == 0:
@@ -245,6 +266,22 @@ def plot_work(t_lst, c_map, f_map, cf_map, output):
   plt.savefig('./usa.eps')
 
 
+def load_pickled_data_skip_t(input_dir):
+  pfile = open(input_dir + 'callers_map.p', 'rb')
+  c_map = pickle.load(pfile)
+  pfile.close()
+
+  pfile = open(input_dir + 'functions_map.p', 'rb')
+  f_map = pickle.load(pfile)
+  pfile.close()
+
+  pfile = open(input_dir + 'combination_map.p', 'rb')
+  cf_map = pickle.load(pfile)
+  pfile.close()
+
+  return c_map, f_map, cf_map
+
+
 def load_pickled_data(input_dir):
   t_lst = []
   pfile = open(input_dir + 'tuples_lst.p', 'rb')
@@ -266,7 +303,7 @@ def load_pickled_data(input_dir):
   return t_lst, c_map, f_map, cf_map
 
 
-def time_analyize(p_data, output_dir):
+def time_analyze(p_data, output_dir, active_interval, num_logs, focus):
 
   # Unique routers
   router_to_times_map = {} 
@@ -287,9 +324,6 @@ def time_analyize(p_data, output_dir):
       else:
         router_to_times_map[r] = [datetime.strptime(str(k), "%Y%m%d"),]
 
-  print 'Number of unique routers: ' + str(len(router_to_times_map))
-  active_routers_list = router_to_times_map.keys()
-  print sorted(active_routers_list)
 
   ## Get time flow, with missing dates
   start_t = datetime.strptime(str(tkeys[0]), "%Y%m%d")
@@ -300,20 +334,45 @@ def time_analyize(p_data, output_dir):
   while st < end_t:
     st = st + timedelta(days=1)
     timeflow.append(st)
+
+  if focus == '0':
+    active_routers_list = router_to_times_map.keys()
+    print "Start date: ", start_t
+    print "End date: ", end_t
+    print '==========================================================='
+    print 'Number of unique routers: ' + str(len(active_routers_list))
+  
+    print sorted(active_routers_list)
+
+  elif focus == '1':
+    active_routers_list = focus_list
+    print "Start date: ", start_t
+    print "End date: ", end_t
+    print '==========================================================='
+    print 'Number of unique routers: ' + str(len(active_routers_list))
+  
+    print sorted(active_routers_list)
  
+  else:
+    print 'unknonw focus value. exit'
+    sys.exit(1)
+
+  do_plot(active_routers_list, router_to_times_map, active_interval, num_logs, timeflow, output_dir,focus)
+
+def do_plot(active_routers_list, router_to_times_map, active_interval, num_logs, timeflow, output_dir, focus):
   # active routers
   ya = {}
   sorted_rkeys = sorted(active_routers_list)
   for r in sorted_rkeys:
     t_list = router_to_times_map[r]
-    if len(t_list) < 10:
+    if len(t_list) < num_logs:
       active_routers_list.remove(r)
     else:
       prev_date = t_list[0]
       for t in t_list:
         now_date = t
         tdelta = now_date - prev_date
-        if tdelta.days > ACTIVE_INTERVAL:
+        if tdelta.days > active_interval:
           if active_routers_list.count(r) != 0:
             active_routers_list.remove(r)
         prev_date = now_date
@@ -324,8 +383,9 @@ def time_analyize(p_data, output_dir):
       if t_list.count(tt) > 0:
         ya[r].append(1)
       else:
-        ya[r].append(0)
+        ya[r].append(-1)
 
+  print '==========================================================='
   print 'Number of active users: ' + str(len(active_routers_list))
   print sorted(active_routers_list)
    
@@ -351,12 +411,12 @@ def time_analyize(p_data, output_dir):
 #  plt.ylim([1.0/1000.0,1000])
   
   ff = plt.gcf()
-#  ax.set_ylim(0.008,0.1)
-#  ax.set_xlim(1,100)
+#  ax.set_xlim(1,50)
 #
   ymajorind = np.arange(len(sorted_rkeys)+1,step=1)
-  tmp = ['N/A',] + [i for i in sorted_rkeys]
+  tmp = ['',] + [i for i in sorted_rkeys]
   plt.yticks(ymajorind,tmp, rotation=0, fontsize=6)
+  plt.ylim(0,37)
 
 #  ymajorind = np.arange(len(ya[sorted_rkeys[0]]),step=1)
   plt.xticks(rotation=45)
@@ -367,7 +427,9 @@ def time_analyize(p_data, output_dir):
   plt.ylabel('Routers', rotation=90)
 #   plt.legend([p1[0],p2[0]], ['with events','without events'],  prop={'size':7})
 #  plt.legend([pl[0][0],pl[1][0],pl[2][0],pl[3][0]], ['m=1','m=50','m=1000','baseline'],  prop={'size':7}, loc='upper center')
-  plt.savefig(output_dir + 'ba.eps', dpi=700)
+
+  fname = 'ui_usage_' + focus + '.eps'
+  plt.savefig(output_dir + fname, dpi=700)
 
 
 
@@ -385,12 +447,24 @@ def main():
   op.add_option( '--output', '-o', action="store", \
                  dest="output", help = "Output directory for figures" )
 
-  ### Check option     
+  op.add_option( '--active_interval', '-t', action="store", \
+                 dest="active_interval", help = "Usage intervals to be considered active" )
+
+  op.add_option( '--nlogs_for_active', '-n', action="store", \
+                 dest="nlogs_for_active", help = "Number of logs to be considered used" )
+
+  op.add_option( '--focus', '-f', action="store", \
+                 dest="focus", help = "Only plot focus routers (0 or 1)" )
+
+
+  # Parsing and processing
   options, args = op.parse_args()
-  if options.input is None or options.output is None:
-    print 'Wrong number of arguments. exit'
-    return
-    
+  args_check = sys.argv[1:]
+  if len(args_check) != 10:
+    print 'Something wrong with paramenters. Please check.'
+    print op.print_help()
+    sys.exit(1)
+
   ### Attach / if not there    
   input_dir = options.input
   output_dir = options.output
@@ -408,6 +482,10 @@ def main():
     print 'Cannot access output dir. Exit.'
     return
 
+  # Set Active_interval and numlogs
+  active_interval= int(options.active_interval)
+  num_logs = int(options.nlogs_for_active)
+
 #  # route id list
 #  global sa_list
 #  fd = open('./sa_routers.list','r')
@@ -423,8 +501,10 @@ def main():
     t_lst, c_map, f_map, cf_map = load_pickled_data(input_dir)
     make_lastlog_time(t_lst, input_dir)
 
+  c_map, f_map, cf_map = load_pickled_data_skip_t(input_dir)
+
   # Analyze
-  time_analyize(input_dir + 'timestamp_map.p', output_dir)
+  time_analyze(input_dir + 'timestamp_map.p', output_dir, active_interval, num_logs, options.focus)
   
 
 

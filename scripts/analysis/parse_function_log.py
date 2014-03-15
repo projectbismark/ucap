@@ -18,6 +18,8 @@ import socket
 import string
 import psycopg2
 import pickle
+import copy
+from optparse import OptionParser
 
 LOCAL_DB_PORT = 54323
 
@@ -88,6 +90,23 @@ def reconnect_to_database():
   return conn
 
 
+def find_router_by_param(params, cursor):
+  param_list = str(params).split(',')
+  caller_router = 'failed'
+
+  for p in param_list:
+    if p.startswith('OW') is True:    # router ID here.
+      caller_router = p
+      break
+    elif p.count('@') is True:        # possibly email address
+      cmd = "SELECT households.id from households,users where parentdigest=households.digest AND users.id='"+p+"'"
+      cursor.execute(cmd)
+      tuples_lst = cursor.fetchall()  # Table entrie in tuple format
+      if len(tuples_lst) > 0:
+        if len(tuples_lst[0]) > 0:
+          caller_router = tuples_lst[0][0]
+  return caller_router
+
 """ call log analysis """
 def call_log_analysis(cursor):
   
@@ -99,11 +118,22 @@ def call_log_analysis(cursor):
   functions_map = {}        # { FunctionName : Number of logs }
   cf_combination_map = {}   # { ((RouterID, FunctionName) : Number of logs }
 
-  for t in tuples_lst:
+  fixed_tuples_lst = copy.deepcopy(tuples_lst)                               
+
+  for idx,t in enumerate(tuples_lst):
     caller_router = t[0]
     function_name = t[1]
     params = t[2]
     time = t[3]
+
+    # If router field seems wrong, find the router by inspecting params.
+    if len(caller_router) < 5:
+      caller_router = find_router_by_param(params, cursor)
+    if len(caller_router) < 5:
+      print 'something wrong with router id name'
+      sys.exit(1)
+
+    fixed_tuples_lst[idx] = (caller_router, t[1],t[2],t[3])
 
     # callers
     if callers_map.has_key(caller_router):
@@ -128,7 +158,8 @@ def call_log_analysis(cursor):
   print len(callers_map)
   print len(functions_map)
 
-  return tuples_lst,callers_map,functions_map,cf_combination_map
+#  return tuples_lst,callers_map,functions_map,cf_combination_map
+  return fixed_tuples_lst,callers_map,functions_map,cf_combination_map
 
 
 """ analyze """
